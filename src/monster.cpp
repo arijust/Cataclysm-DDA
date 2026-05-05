@@ -860,6 +860,11 @@ int monster::print_info( const catacurses::window &w, int vStart, int vLines, in
     const int max_width = getmaxx( w ) - column - 1;
     std::ostringstream oss;
 
+    // This header specifically refers to them as a somewhat-misleading "Creatures" instead of "Monsters".
+    // This is because many of our "Monster" objects do not represent things that are pejorative monsters.
+    // Therefore the header is intentionally *neutral* on the language.
+    mvwprintz( w, point( column, vStart++ ), c_light_blue, _( "-----CREATURE-----" ) );
+
     oss << get_tag_from_color( c_white ) << get_origin( type->src ) << "</color>" << "\n";
 
     if( debug_mode ) {
