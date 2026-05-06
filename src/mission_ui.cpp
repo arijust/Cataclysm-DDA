@@ -104,7 +104,7 @@ class mission_ui_impl : public cataimgui::window
 
 void mission_ui::draw_mission_ui()
 {
-    input_context ctxt;
+    input_context ctxt( "MISSION_UI" );
     mission_ui_impl p_impl;
 
     ctxt.register_navigate_ui_list();
