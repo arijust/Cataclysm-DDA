@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <optional>
 #include <sstream>
 #include <string>
@@ -14,6 +15,8 @@
 #include "item.h"
 #include "item_components.h"
 #include "item_location.h"
+#include "item_uid.h"
+#include "item_wakeup.h"
 #include "json.h"
 #include "json_loader.h"
 #include "map.h"
@@ -488,3 +491,197 @@ TEST_CASE( "craft_resolve_overdue_passive_chains_preserve_wall_time",
         CHECK( on_map.get_ready_at() == calendar::turn + 20_minutes );
     }
 }
+
+TEST_CASE( "craft_actualize_ready_fail_at_precedes_ready",
+           "[craft][attention][overdue][fail]" )
+{
+    clear_map();
+    avatar &u = get_avatar();
+    map &here = get_map();
+    const tripoint_bub_ms origin( 60, 60, 0 );
+    u.setpos( here, origin );
+
+    item ingredient( itype_2x4, calendar::turn );
+    item placed( &recipe_cudgel_test_timeout_recipe.obj(), 1, ingredient );
+    item &on_map = here.add_item( origin, placed );
+    REQUIRE( on_map.is_craft() );
+
+    on_map.set_current_step( 1 );
+    on_map.set_passive_started_at( calendar::turn );
+    on_map.set_ready_at( calendar::turn + 10_minutes );
+    on_map.set_fail_at( calendar::turn + 25_minutes );
+    on_map.set_crafter_id( u.getID() );
+    std::vector<attention_plan> plans( 2 );
+    on_map.set_step_plans( plans );
+
+    item_location loc( map_cursor( here.get_abs( origin ) ), &on_map );
+
+    craft_resolve_overdue_passive( on_map, calendar::turn + 30_minutes, loc );
+
+    CHECK( loc.get_item() == nullptr );
+}
+
+TEST_CASE( "craft_stamp_passive_entry_carries_step_progress_fraction",
+           "[craft][attention][migration]" )
+{
+    clear_map();
+    avatar &u = get_avatar();
+    map &here = get_map();
+    const tripoint_bub_ms origin( 60, 60, 0 );
+    u.setpos( here, origin );
+
+    item ingredient( itype_2x4, calendar::turn );
+    item placed( &recipe_cudgel_test_unattended_simple.obj(), 1, ingredient );
+    item &on_map = here.add_item( origin, placed );
+    REQUIRE( on_map.is_craft() );
+
+    on_map.set_current_step( 1 );
+    std::vector<attention_plan> plans( 2 );
+    on_map.set_step_plans( plans );
+    item_location loc( map_cursor( here.get_abs( origin ) ), &on_map );
+
+    SECTION( "no prior progress: fresh full-duration stamp" ) {
+        on_map.set_step_progress( 0.0 );
+        craft_stamp_passive_entry( on_map, u, calendar::turn, loc );
+        CHECK( on_map.get_passive_started_at() == calendar::turn );
+        CHECK( on_map.get_ready_at() > calendar::turn );
+    }
+
+    SECTION( "half-step prior progress: passive entry back-dated half-step" ) {
+        const recipe &rec = recipe_cudgel_test_unattended_simple.obj();
+        const crafting_cost_context ctx = crafting_cost_context::for_recipe( u, rec );
+        const double active_budget = rec.step_budget_moves(
+                                         u, 1, on_map.get_making_batch_size(), ctx );
+        REQUIRE( active_budget > 0.0 );
+        on_map.set_step_progress( active_budget * 0.5 );
+
+        craft_stamp_passive_entry( on_map, u, calendar::turn, loc );
+
+        // Entry back-dated; full passive duration preserved.
+        CHECK( on_map.get_passive_started_at() < calendar::turn );
+        const time_duration step_dur = on_map.get_ready_at() -
+                                       on_map.get_passive_started_at();
+        const time_duration elapsed = calendar::turn -
+                                      on_map.get_passive_started_at();
+        CHECK( elapsed > 0_seconds );
+        CHECK( elapsed < step_dur );
+    }
+
+    SECTION( "step_progress at or beyond budget: clamped to full step elapsed" ) {
+        const recipe &rec = recipe_cudgel_test_unattended_simple.obj();
+        const crafting_cost_context ctx = crafting_cost_context::for_recipe( u, rec );
+        const double active_budget = rec.step_budget_moves(
+                                         u, 1, on_map.get_making_batch_size(), ctx );
+        REQUIRE( active_budget > 0.0 );
+        on_map.set_step_progress( active_budget * 2.0 );
+
+        craft_stamp_passive_entry( on_map, u, calendar::turn, loc );
+
+        // Fraction clamps at 1.0; ready_at lands at now.
+        CHECK( on_map.get_ready_at() == calendar::turn );
+    }
+}
+
+TEST_CASE( "craft_tname_freezes_projection_during_env_pause",
+           "[craft][attention][display]" )
+{
+    item ingredient( itype_2x4, calendar::turn );
+    item built( &recipe_cudgel_test_unattended_simple.obj(), 1, ingredient );
+    REQUIRE( built.is_craft() );
+
+    const time_point t0 = calendar::turn;
+    built.item_counter = 0;
+    built.set_passive_start_counter( 1000000 );
+    built.set_passive_end_counter( 9000000 );
+
+    // Entered 5m ago, paused 2m ago.  Elapsed clamps to 3m of 10m = 30%
+    // of the 1M..9M window -> 3.4M -> 34%.
+    built.set_passive_started_at( t0 - 5_minutes );
+    built.set_pause_started_at( t0 - 2_minutes );
+    built.set_ready_at( t0 + 1_minutes );
+    built.set_saved_ready_at( t0 + 5_minutes );
+
+    const std::string name = built.tname();
+    CHECK( name.find( "34%" ) != std::string::npos );
+}
+
+TEST_CASE( "craft_terminal_removal_cancels_pending_wakeups",
+           "[craft][attention][wakeup]" )
+{
+    clear_map();
+    avatar &u = get_avatar();
+    map &here = get_map();
+    const tripoint_bub_ms origin( 60, 60, 0 );
+    u.setpos( here, origin );
+
+    item ingredient( itype_2x4, calendar::turn );
+    item placed( &recipe_cudgel_test_timeout_recipe.obj(), 1, ingredient );
+    item &on_map = here.add_item( origin, placed );
+    REQUIRE( on_map.is_craft() );
+
+    on_map.set_current_step( 1 );
+    on_map.set_passive_started_at( calendar::turn );
+    on_map.set_ready_at( calendar::turn + 10_minutes );
+    on_map.set_fail_at( calendar::turn + 25_minutes );
+    on_map.set_crafter_id( u.getID() );
+    std::vector<attention_plan> plans( 2 );
+    plans[1].choice = step_choice::set_timer;
+    plans[1].alarm_offset = 5_minutes;
+    on_map.set_step_plans( plans );
+
+    item_location loc( map_cursor( here.get_abs( origin ) ), &on_map );
+    on_map.set_alarm_at( calendar::turn + 5_minutes );
+    get_item_wakeups().rebuild_for_item( loc );
+    const int64_t uid = on_map.uid().get_value();
+    REQUIRE( get_item_wakeups().is_scheduled( uid, item_wakeup_kind::ready_check ) );
+    REQUIRE( get_item_wakeups().is_scheduled( uid, item_wakeup_kind::fail_check ) );
+    REQUIRE( get_item_wakeups().is_scheduled( uid, item_wakeup_kind::alarm ) );
+
+    craft_resolve_overdue_passive( on_map, calendar::turn + 30_minutes, loc );
+
+    REQUIRE( loc.get_item() == nullptr );
+    CHECK_FALSE( get_item_wakeups().is_scheduled( uid, item_wakeup_kind::ready_check ) );
+    CHECK_FALSE( get_item_wakeups().is_scheduled( uid, item_wakeup_kind::fail_check ) );
+    CHECK_FALSE( get_item_wakeups().is_scheduled( uid, item_wakeup_kind::alarm ) );
+}
+
+TEST_CASE( "craft_env_unpause_alarm_clears_when_already_due",
+           "[craft][attention][resume][alarm]" )
+{
+    clear_map();
+    avatar &u = get_avatar();
+    map &here = get_map();
+    const tripoint_bub_ms origin( 60, 60, 0 );
+    u.setpos( here, origin );
+
+    item ingredient( itype_2x4, calendar::turn );
+    item placed( &recipe_cudgel_test_unattended_simple.obj(), 1, ingredient );
+    item &on_map = here.add_item( origin, placed );
+    REQUIRE( on_map.is_craft() );
+
+    on_map.set_current_step( 1 );
+    on_map.set_crafter_id( u.getID() );
+    std::vector<attention_plan> plans( 2 );
+    plans[1].choice = step_choice::set_timer;
+    plans[1].alarm_offset = 5_minutes;
+    on_map.set_step_plans( plans );
+
+    // saved_alarm_at < pause_started_at: slid alarm_at lands in the past
+    // after restore; must fire inline.
+    const time_point t0 = calendar::turn;
+    on_map.set_passive_started_at( t0 );
+    on_map.set_ready_at( t0 + 1_minutes );
+    on_map.set_saved_ready_at( t0 + 30_minutes );
+    on_map.set_pause_started_at( t0 + 5_minutes );
+    on_map.set_saved_alarm_at( t0 + 2_minutes );
+    on_map.set_alarm_at( calendar::before_time_starts );
+
+    item_location loc( map_cursor( here.get_abs( origin ) ), &on_map );
+
+    craft_actualize_scheduled( on_map, item_wakeup_kind::ready_check,
+                               t0 + 10_minutes, loc );
+
+    CHECK( on_map.get_alarm_at() == calendar::before_time_starts );
+    CHECK( on_map.get_pause_started_at() == calendar::before_time_starts );
+}
+
