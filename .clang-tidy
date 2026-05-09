@@ -124,6 +124,8 @@ Checks: [
     -readability-use-std-min-max,                       # if/else clamp idiom is preferred to std::min/max here
 
     # ====  Disabled noise from checks introduced in LLVM 21+  ====
+    -readability-enum-initial-value,                    # 13 enums mix explicit and defaulted values; mechanical sweep deferred
+    -cert-int09-c,                                      # alias of readability-enum-initial-value
     -readability-use-concise-preprocessor-directives,
 
     # ====  Disabled noise from checks introduced in LLVM 22+  ====
@@ -138,6 +140,7 @@ Checks: [
 
 WarningsAsErrors: '*'
 HeaderFilterRegex: '(src|test|tools).*'
+ExcludeHeaderFilterRegex: '.*src/(colony|list)\.h$'
 FormatStyle:     none
 CheckOptions:
   - key: cata-large-inline-function.MaxStatements
