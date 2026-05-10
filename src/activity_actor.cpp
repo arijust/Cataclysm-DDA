@@ -6327,6 +6327,20 @@ void craft_activity_actor::do_turn( player_activity &act, Character &crafter )
             if( craft.get_passive_started_at() == calendar::before_time_starts ) {
                 craft_stamp_passive_entry( craft, crafter, calendar::turn, craft_item );
                 mode_ = derive_mode();
+                // Back-dated entry can leave alarm and/or ready already due.
+                // Alarm runs first; the alarm handler elides itself if ready
+                // also fires same turn.
+                if( craft.get_alarm_at() != calendar::before_time_starts &&
+                    calendar::turn >= craft.get_alarm_at() ) {
+                    craft_actualize_scheduled( craft, item_wakeup_kind::alarm,
+                                               calendar::turn, craft_item );
+                }
+                if( craft.get_ready_at() != calendar::before_time_starts &&
+                    calendar::turn >= craft.get_ready_at() ) {
+                    craft_actualize_scheduled( craft, item_wakeup_kind::ready_check,
+                                               calendar::turn, craft_item );
+                    return;
+                }
             }
 
             if( plan.choice == step_choice::do_wait ) {
