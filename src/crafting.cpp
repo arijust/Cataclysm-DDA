@@ -1806,7 +1806,7 @@ Character::craft_roll_data Character::recipe_success_roll_data( const recipe &ma
             const float helper_skill_average = std::max( guy->get_recipe_weighted_skill_average( making ),
                                                0.0f );
             helpers_weighted_average += std::pow( helper_skill_average, 2 );
-            add_msg_if_player( m_info, _( "%s helps with crafting…" ), guy->name );
+            add_msg_if_player( m_info, _( "%s helps with crafting…" ), guy->get_name() );
         }
     }
 
