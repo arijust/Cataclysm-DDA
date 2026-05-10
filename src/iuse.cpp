@@ -4020,7 +4020,7 @@ std::optional<int> iuse::gasmask( Character *p, item *it, const tripoint_bub_ms 
             }
         }
         if( it->get_var( "gas_absorbed", 0 ) >= 60 ) {
-            it->consume_tool_uses( 1, get_map(), pos, p );
+            it->ammo_consume( 1, pos, p );
             it->set_var( "gas_absorbed", 0 );
             if( it->ammo_remaining( ) < 10 ) {
                 p->add_msg_player_or_npc(
