@@ -3293,6 +3293,8 @@ item::reload_option game_menus::inv::select_ammo( Character &you, const item_loc
                     //~ %1$s is owner+well description, %2$d is 1-indexed well number on that owner
                     label = string_format( _( "%1$s (well %2$d)" ), label, n );
                 }
+            } else if( rt.kind == reload_target::kind::integral_magazine ) {
+                label = string_format( _( "%s: integral magazine" ), rt.owner->tname() );
             } else {
                 //~ %1$s is the gun or gunmod that holds the magazine, %2$s is the magazine's tname
                 label = string_format( _( "%1$s: top up %2$s" ), rt.owner->tname(),
