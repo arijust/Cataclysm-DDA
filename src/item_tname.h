@@ -20,8 +20,6 @@ namespace tname
 // Each element is checked individually for stacking in item::stacks_with(), and all elements much stack for any 2 items to stack
 enum class segments : std::size_t {
     FAULTS = 0,
-    WEIGHT,
-    VOLUME,
     DIRT,
     OVERHEAT,
     FAVORITE_PRE,

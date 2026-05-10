@@ -35,13 +35,13 @@
 #include "point.h"
 #include "recipe.h"
 #include "relic.h"
+#include "string_formatter.h"
 #include "text_snippets.h"
 #include "translation.h"
 #include "translation_cache.h"
 #include "translations.h"
 #include "type_id.h"
 #include "units.h"
-#include "units_utility.h"
 #include "value_ptr.h"
 
 static const flag_id json_flag_HINT_THE_LOCATION( "HINT_THE_LOCATION" );
@@ -61,28 +61,6 @@ std::string noop( item const & /* it */, unsigned int /* quantity */,
                   segment_bitset const & /* segments */ )
 {
     return {};
-}
-
-std::string amount_weight( item const &it, unsigned int quantity,
-                           segment_bitset const &/* segments */ )
-{
-    std::string prefix;
-    if( it.type->display_type == item_display_type::BY_WEIGHT ) {
-        prefix = it.type->count_or_volume_or_weight_prefix( quantity );
-    }
-
-    return prefix;
-}
-
-std::string amount_volume( item const &it, unsigned int quantity,
-                           segment_bitset const &/* segments */ )
-{
-    std::string prefix;
-    if( it.type->display_type == item_display_type::BY_VOLUME ) {
-        prefix = it.type->count_or_volume_or_weight_prefix( quantity );
-    }
-
-    return prefix;
 }
 
 std::string faults( item const &it, unsigned int /* quantity */,
@@ -715,8 +693,6 @@ constexpr std::array<decl_f_print_segment *, num_segments> get_segs_array()
 {
     std::array<decl_f_print_segment *, num_segments> arr{};
     arr[static_cast<size_t>( tname::segments::FAULTS ) ] = faults;
-    arr[static_cast<size_t>( tname::segments::WEIGHT ) ] = amount_weight;
-    arr[static_cast<size_t>( tname::segments::VOLUME ) ] = amount_volume;
     arr[static_cast<size_t>( tname::segments::FAULTS_SUFFIX ) ] = faults_suffix;
     arr[static_cast<size_t>( tname::segments::DIRT ) ] = dirt_symbol;
     arr[static_cast<size_t>( tname::segments::OVERHEAT ) ] = overheat_symbol;

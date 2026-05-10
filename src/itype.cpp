@@ -134,11 +134,10 @@ bool itype::dont_display_count_or_charges() const
 
 std::string itype::count_or_volume_or_weight_prefix( unsigned int quantity ) const
 {
-    // Extra space required to avoid string concatenation in our myriad of UIs :(
     if( display_type == item_display_type::BY_WEIGHT ) {
-        return string_format( _( "%1$s " ), weight_to_string( weight * quantity, true, true ) );
+        return string_format( _( "%1$s" ), weight_to_string( weight * quantity, true, true ) );
     } else if( display_type == item_display_type::BY_VOLUME ) {
-        return string_format( _( "%1$s " ), vol_to_string( volume * quantity, true, true ) );
+        return string_format( _( "%1$s" ), vol_to_string( volume * quantity, true, true ) );
     }
     return std::to_string( quantity );
 }
