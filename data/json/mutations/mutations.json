@@ -7316,8 +7316,7 @@
     "vitamin_cost": 160,
     "visibility": 1,
     "ugliness": 5,
-    "encumbrance_covered": [ [ "foot_l", 10 ], [ "foot_r", 10 ] ],
-    "restricts_gear": [ "leg_stub_r", "leg_stub_l" ]
+    "encumbrance_covered": [ [ "foot_l", 10 ], [ "foot_r", 10 ] ]
   },
   {
     "type": "mutation",

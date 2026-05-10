@@ -1399,7 +1399,7 @@
     "visibility": 8,
     "ugliness": 4,
     "flags": [ "TOUGH_FEET" ],
-    "restricts_gear": [ "foot_l", "foot_r", "leg_stub_r", "leg_stub_l" ],
+    "restricts_gear": [ "foot_l", "foot_r" ],
     "enchantments": [
       {
         "values": [
