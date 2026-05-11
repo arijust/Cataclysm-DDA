@@ -967,10 +967,10 @@ bool cataimgui::window::is_bounds_changed()
     return p_impl->is_resized;
 }
 
-size_t cataimgui::window::get_text_width( const std::string &text )
+size_t cataimgui::window::get_text_width( std::string_view text )
 {
 #ifndef TUI
-    return ImGui::CalcTextSize( text.c_str() ).x;
+    return ImGui::CalcTextSize( text.data(), text.data() + text.size() ).x;
 #else
     return utf8_width( text );
 #endif

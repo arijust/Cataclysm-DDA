@@ -15,6 +15,7 @@
 #include <ostream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <unordered_map>
 #include <utility>
@@ -436,7 +437,7 @@ void musicFinished()
     play_music_file( next.file, next.volume );
 }
 
-void play_music( const std::string &playlist )
+void play_music( std::string_view playlist )
 {
     // Don't interrupt playlist that's already playing.
     if( playlist == current_playlist ) {
@@ -445,7 +446,7 @@ void play_music( const std::string &playlist )
         stop_music();
     }
 
-    const auto iter = playlists.find( playlist );
+    const auto iter = playlists.find( std::string( playlist ) );
     if( iter == playlists.end() ) {
         return;
     }
@@ -649,24 +650,25 @@ static const sound_effect *find_random_effect( const std::string &id, const std:
     return &random_entry_ref( *iter );
 }
 
-bool sfx::has_variant_sound( const std::string &id, const std::string &variant,
-                             const std::string &season, const std::optional<bool> &is_indoors,
+bool sfx::has_variant_sound( std::string_view id, std::string_view variant,
+                             std::string_view season, const std::optional<bool> &is_indoors,
                              const std::optional<bool> &is_night )
 {
-    return find_random_effect( id, variant, season, is_indoors, is_night ) != nullptr;
+    return find_random_effect( std::string( id ), std::string( variant ), std::string( season ),
+                               is_indoors, is_night ) != nullptr;
 }
 
 // Returns a sound effect matching given id and variant.
 // Unlike has_variant_sound(), this doesn't fallback to "default" variants.
-bool sfx::has_exact_variant_sound( const std::string &id, const std::string &variant,
-                                   const std::string &season, const std::optional<bool> &is_indoors,
+bool sfx::has_exact_variant_sound( std::string_view id, std::string_view variant,
+                                   std::string_view season, const std::optional<bool> &is_indoors,
                                    const std::optional<bool> &is_night )
 {
 
-    const std::vector<sound_effect> *iter = sfx_resources.sound_effects.find_no_fallback( id, variant,
-                                            season,
-                                            is_indoors,
-                                            is_night );
+    const std::vector<sound_effect> *iter = sfx_resources.sound_effects.find_no_fallback(
+            std::string( id ), std::string( variant ), std::string( season ),
+            is_indoors,
+            is_night );
 
     return iter != nullptr;
 }
@@ -683,8 +685,8 @@ static bool is_time_slowed()
 }
 
 
-void sfx::play_variant_sound( const std::string &id, const std::string &variant,
-                              const std::string &season, const std::optional<bool> &is_indoors,
+void sfx::play_variant_sound( std::string_view id, std::string_view variant,
+                              std::string_view season, const std::optional<bool> &is_indoors,
                               const std::optional<bool> &is_night, int volume )
 {
     if( test_mode ) {
@@ -696,9 +698,11 @@ void sfx::play_variant_sound( const std::string &id, const std::string &variant,
     if( !check_sound( volume ) ) {
         return;
     }
-    const sound_effect *eff = find_random_effect( id, variant, season, is_indoors, is_night );
+    const std::string id_s( id );
+    const sound_effect *eff = find_random_effect( id_s, std::string( variant ), std::string( season ),
+                              is_indoors, is_night );
     if( eff == nullptr ) {
-        eff = find_random_effect( id, "default", "", std::optional<bool>(), std::optional<bool>() );
+        eff = find_random_effect( id_s, "default", "", std::optional<bool>(), std::optional<bool>() );
         if( eff == nullptr ) {
             return;
         }
@@ -713,8 +717,8 @@ void sfx::play_variant_sound( const std::string &id, const std::string &variant,
     sound_backend::play_oneshot( effect_to_play, opts );
 }
 
-void sfx::play_variant_sound( const std::string &id, const std::string &variant,
-                              const std::string &season, const std::optional<bool> &is_indoors,
+void sfx::play_variant_sound( std::string_view id, std::string_view variant,
+                              std::string_view season, const std::optional<bool> &is_indoors,
                               const std::optional<bool> &is_night, int volume, units::angle angle,
                               double pitch_min, double pitch_max )
 {
@@ -727,7 +731,8 @@ void sfx::play_variant_sound( const std::string &id, const std::string &variant,
     if( !check_sound( volume ) ) {
         return;
     }
-    const sound_effect *eff = find_random_effect( id, variant, season, is_indoors, is_night );
+    const sound_effect *eff = find_random_effect( std::string( id ), std::string( variant ),
+                              std::string( season ), is_indoors, is_night );
     if( eff == nullptr ) {
         return;
     }
@@ -745,8 +750,8 @@ void sfx::play_variant_sound( const std::string &id, const std::string &variant,
     sound_backend::play_oneshot( effect_to_play, opts );
 }
 
-void sfx::play_ambient_variant_sound( const std::string &id, const std::string &variant,
-                                      const std::string &season, const std::optional<bool> &is_indoors,
+void sfx::play_ambient_variant_sound( std::string_view id, std::string_view variant,
+                                      std::string_view season, const std::optional<bool> &is_indoors,
                                       const std::optional<bool> &is_night, int volume,
                                       channel channel, int fade_in_duration, double pitch, int loops )
 {
@@ -759,7 +764,8 @@ void sfx::play_ambient_variant_sound( const std::string &id, const std::string &
     if( is_channel_playing( channel ) ) {
         return;
     }
-    const sound_effect *eff = find_random_effect( id, variant, season, is_indoors, is_night );
+    const sound_effect *eff = find_random_effect( std::string( id ), std::string( variant ),
+                              std::string( season ), is_indoors, is_night );
     if( eff == nullptr ) {
         return;
     }

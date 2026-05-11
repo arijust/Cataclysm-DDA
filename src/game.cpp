@@ -26,6 +26,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <type_traits>
 #include <unordered_map>
@@ -6497,9 +6498,9 @@ int game::get_user_action_counter() const
 }
 
 #if defined(TILES)
-bool game::take_screenshot( const std::string &path ) const
+bool game::take_screenshot( std::string_view path ) const
 {
-    return save_screenshot( path );
+    return save_screenshot( std::string( path ) );
 }
 
 bool game::take_screenshot() const
@@ -6526,7 +6527,7 @@ bool game::take_screenshot() const
     }
 }
 #else
-bool game::take_screenshot( const std::string &/*path*/ ) const
+bool game::take_screenshot( std::string_view /*path*/ ) const
 {
     return false;
 }

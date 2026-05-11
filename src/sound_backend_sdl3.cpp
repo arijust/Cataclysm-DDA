@@ -72,6 +72,8 @@ std::atomic<uint32_t> g_music_generation{0};
 const char *tag_for_group( sfx::group g )
 {
     switch( g ) {
+        case sfx::group::none:
+            return nullptr;
         case sfx::group::weather:
             return "weather";
         case sfx::group::time_of_day:

@@ -804,7 +804,7 @@ class game
         * @note: Only works for SDL/TILES (otherwise the function returns `false`). A window (more precisely, a viewport) must already exist and the SDL renderer must be valid.
         * @returns `true` if the screenshot generation was successful, `false` otherwise.
         */
-        bool take_screenshot( const std::string &file_path ) const;
+        bool take_screenshot( std::string_view file_path ) const;
         /** Saves a screenshot of the current viewport, as a PNG file. Filesystem location is derived from the current world and character.
         * @note: Only works for SDL/TILES (otherwise the function returns `false`). A window (more precisely, a viewport) must already exist and the SDL renderer must be valid.
         * @returns `true` if the screenshot generation was successful, `false` otherwise.
@@ -874,7 +874,7 @@ class game
         // TILES only, in curses this does nothing
         void draw_highlight( const tripoint_bub_ms &p );
         // Draws an asynchronous animation at p with tile_id as its sprite. If ncstr is specified, it will also be displayed in curses.
-        void draw_async_anim( const tripoint_bub_ms &p, const std::string &tile_id,
+        void draw_async_anim( const tripoint_bub_ms &p, std::string_view tile_id,
                               const std::string &ncstr = "",
                               const nc_color &nccol = c_black );
         void draw_radiation_override( const tripoint_bub_ms &p, int rad );
