@@ -963,3 +963,91 @@ TEST_CASE( "reconcile_walks_avatar_inventory_for_env_check",
     CHECK( get_item_wakeups().is_scheduled( uid, item_wakeup_kind::ready_check ) );
 }
 
+TEST_CASE( "compute_inflight_alarm_choices_for_resume_timer_modal",
+           "[craft][attention][modal]" )
+{
+    const time_point started = calendar::turn_zero;
+
+    GIVEN( "a 10-minute step with ready_at at started+10min" ) {
+        const time_point ready = started + 10_minutes;
+
+        WHEN( "8 minutes have passed (2 minutes remaining)" ) {
+            const inflight_alarm_choices c = compute_inflight_alarm_choices(
+                                                 started, ready, started + 8_minutes );
+            THEN( "finish is offered but five-before is disabled" ) {
+                CHECK( c.remaining == 2_minutes );
+                CHECK( c.finish_enabled );
+                CHECK_FALSE( c.five_before_enabled );
+            }
+            THEN( "finish offset resolves to ready_at when added to step start" ) {
+                REQUIRE( c.finish_offset.has_value() );
+                CHECK( started + *c.finish_offset == ready );
+                CHECK_FALSE( c.five_before_offset.has_value() );
+            }
+        }
+
+        WHEN( "3 minutes have passed (7 minutes remaining)" ) {
+            const inflight_alarm_choices c = compute_inflight_alarm_choices(
+                                                 started, ready, started + 3_minutes );
+            THEN( "both finish and five-before choices are enabled" ) {
+                CHECK( c.remaining == 7_minutes );
+                CHECK( c.finish_enabled );
+                CHECK( c.five_before_enabled );
+            }
+            THEN( "both offsets are step-start-anchored and resolve to ready_at and ready_at - 5min" ) {
+                REQUIRE( c.finish_offset.has_value() );
+                REQUIRE( c.five_before_offset.has_value() );
+                CHECK( started + *c.finish_offset == ready );
+                CHECK( started + *c.five_before_offset == ready - 5_minutes );
+            }
+        }
+
+        WHEN( "12 minutes have passed (step is overdue)" ) {
+            const inflight_alarm_choices c = compute_inflight_alarm_choices(
+                                                 started, ready, started + 12_minutes );
+            THEN( "no timer choices are offered" ) {
+                CHECK( c.remaining == -2_minutes );
+                CHECK_FALSE( c.finish_enabled );
+                CHECK_FALSE( c.five_before_enabled );
+                CHECK_FALSE( c.finish_offset.has_value() );
+                CHECK_FALSE( c.five_before_offset.has_value() );
+            }
+        }
+    }
+
+    GIVEN( "a paused step whose live_ready_at has been slid forward" ) {
+        // live_ready_at = passive_started_at + slid duration via env pause.
+        const time_point ready = started + 15_minutes;
+
+        WHEN( "evaluated 6 minutes after step start" ) {
+            const inflight_alarm_choices c = compute_inflight_alarm_choices(
+                                                 started, ready, started + 6_minutes );
+            THEN( "finish offset stays step-start-anchored, not slid-ready-anchored" ) {
+                REQUIRE( c.finish_offset.has_value() );
+                CHECK( *c.finish_offset == 15_minutes );
+                CHECK( started + *c.finish_offset == ready );
+            }
+        }
+    }
+
+    GIVEN( "a step env-paused at minute 4 of an originally 10-minute deadline" ) {
+        const time_point saved_ready_at = started + 10_minutes;
+        const time_point pause_started = started + 4_minutes;
+
+        WHEN( "helper is called with eval_now = pause_started" ) {
+            const inflight_alarm_choices c = compute_inflight_alarm_choices(
+                                                 started, saved_ready_at, pause_started );
+            THEN( "remaining reflects the time left at the moment of pause" ) {
+                CHECK( c.remaining == 6_minutes );
+                CHECK( c.finish_enabled );
+                CHECK( c.five_before_enabled );
+            }
+            THEN( "offsets stay step-start-anchored against saved_ready_at" ) {
+                REQUIRE( c.finish_offset.has_value() );
+                REQUIRE( c.five_before_offset.has_value() );
+                CHECK( started + *c.finish_offset == saved_ready_at );
+                CHECK( started + *c.five_before_offset == saved_ready_at - 5_minutes );
+            }
+        }
+    }
+}
