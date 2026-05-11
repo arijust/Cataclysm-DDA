@@ -203,6 +203,9 @@ static option_overrides_t extract_option_overrides( const std::string_view optio
     return ret;
 }
 
+namespace
+{
+
 struct CataListener : Catch::TestEventListenerBase {
     using TestEventListenerBase::TestEventListenerBase;
 
@@ -307,6 +310,8 @@ struct CataListener : Catch::TestEventListenerBase {
     }
 
 };
+
+} // namespace
 
 CATCH_REGISTER_LISTENER( CataListener )
 

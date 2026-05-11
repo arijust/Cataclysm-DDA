@@ -92,6 +92,9 @@ static const itype_id itype_test_shot_00_fire_damage( "test_shot_00_fire_damage"
 
 using firing_statistics = statistics<bool>;
 
+namespace
+{
+
 class Threshold
 {
     public:
@@ -108,6 +111,8 @@ class Threshold
         double _accuracy;
         double _chance;
 };
+
+} // namespace
 
 template < class T >
 static std::ostream &operator <<( std::ostream &os, const std::vector<T> &v )

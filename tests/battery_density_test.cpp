@@ -17,10 +17,13 @@
 static const ammotype ammo_battery( "battery" );
 static const flag_id json_flag_DEBUG_ONLY( "DEBUG_ONLY" );
 
+namespace
+{
 struct battery_chemistry_family {
     float max_energy_density_kj_kg;
     float max_energy_density_kj_l;
 };
+} // namespace
 
 // NOLINTBEGIN(cata-static-string_id-constants)
 static const std::map<itype_id, std::string> battery_to_chemistry = {

@@ -85,12 +85,17 @@ static int get_item_count( const std::set<const item *> &items )
     return sum;
 }
 
+namespace
+{
+
 struct failure {
     string_id<profession> prof;
     std::vector<trait_id> mut;
     itype_id item_name;
     std::string reason;
 };
+
+} // namespace
 
 namespace std
 {
