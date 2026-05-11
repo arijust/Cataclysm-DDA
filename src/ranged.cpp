@@ -212,6 +212,8 @@ static int RAS_time( const Character &p, const item_location &loc );
 static void cycle_action( item &weap, const itype_id &ammo, map *here, const tripoint_bub_ms &pos );
 static void make_gun_sound_effect( const Character &p, bool burst, item *weapon );
 
+namespace
+{
 class target_ui
 {
     public:
@@ -472,6 +474,7 @@ class target_ui
         // `harmful` is `false` if using a non-damaging spell
         void on_target_accepted( bool harmful ) const;
 };
+} // namespace
 
 target_handler::trajectory target_handler::mode_select_only( avatar &you, int range )
 {
@@ -1863,12 +1866,15 @@ static void do_aim( Character &you, const item &relevant, const Target_attribute
     }
 }
 
+namespace
+{
 struct confidence_rating {
     double aim_level;
     char symbol;
     std::string color;
     std::string label;
 };
+} // namespace
 
 static int print_steadiness( const catacurses::window &w, int line_number, double steadiness )
 {
@@ -1955,6 +1961,8 @@ Target_attributes::Target_attributes( int rng, double target_size, float light_t
 * struct used to hold the information on entire aim_type prediction;
 * all the properties and odds for every 'confidence' outcome
 */
+namespace
+{
 struct aim_type_prediction {
     struct aim_confidence {
         std::string label;
@@ -1980,6 +1988,7 @@ struct recoil_prediction {
     double recoil;
     int moves;
 };
+} // namespace
 
 /*
 * This method tries to estimate the amount of moves required to reach

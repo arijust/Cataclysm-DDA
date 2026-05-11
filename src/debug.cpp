@@ -171,6 +171,8 @@ static uintptr_t get_image_base( const char *const path )
  * Class for capturing debugmsg,
  * used by capture_debugmsg_during.
  */
+namespace
+{
 class capture_debugmsg
 {
     public:
@@ -178,6 +180,7 @@ class capture_debugmsg
         std::string dmsg();
         ~capture_debugmsg();
 };
+} // namespace
 
 std::string capture_debugmsg_during( const std::function<void()> &func )
 {
@@ -278,6 +281,8 @@ std::string filter_name( debug_filter value )
 }
 } // namespace debugmode
 
+namespace
+{
 struct buffered_prompt_info {
     std::string filename;
     std::string line;
@@ -285,6 +290,7 @@ struct buffered_prompt_info {
     std::string text;
     bool forced;
 };
+} // namespace
 
 namespace
 {
@@ -432,6 +438,8 @@ void replay_buffered_debugmsg_prompts()
     buffered_prompts().clear();
 }
 
+namespace
+{
 struct time_info {
     int hours;
     int minutes;
@@ -452,9 +460,12 @@ struct time_info {
         return out;
     }
 };
+} // namespace
 
 static time_info get_time() noexcept;
 
+namespace
+{
 struct repetition_folder {
     const char *m_filename = nullptr;
     const char *m_line = nullptr;
@@ -515,6 +526,7 @@ struct repetition_folder {
         return ( now_raw - old_raw ) > timeout_raw;
     }
 };
+} // namespace
 
 static repetition_folder rep_folder;
 static void output_repetitions( std::ostream &out );
@@ -610,6 +622,8 @@ void limitDebugClass( int class_bitmask )
 // Null OStream                                                     {{{2
 // ---------------------------------------------------------------------
 
+namespace
+{
 class NullStream : public std::ostream
 {
     public:
@@ -617,6 +631,7 @@ class NullStream : public std::ostream
         NullStream( const NullStream & ) = delete;
         NullStream( NullStream && ) = delete;
 };
+} // namespace
 
 // DebugFile OStream Wrapper                                        {{{2
 // ---------------------------------------------------------------------
@@ -718,6 +733,8 @@ struct OutputDebugStreamA : public std::ostream {
 };
 #endif
 
+namespace
+{
 struct DebugFile {
     void init( DebugOutput, const cata_path &filename );
     void deinit();
@@ -734,6 +751,7 @@ struct DebugFile {
     std::shared_ptr<std::ostream> file = std::make_shared<std::ostringstream>();
     cata_path filename;
 };
+} // namespace
 
 // DebugFile OStream Wrapper                                        {{{2
 // ---------------------------------------------------------------------
@@ -1625,6 +1643,8 @@ std::string game_info::operating_system()
 }
 
 #if !defined(EMSCRIPTEN) && !defined(__CYGWIN__) && !defined (__ANDROID__) && ( defined (__linux__) || defined(unix) || defined(__unix__) || defined(__unix) || ( defined(__APPLE__) && defined(__MACH__) ) || defined(CATA_IS_ON_BSD) ) // linux; unix; MacOs; BSD
+namespace
+{
 class FILEDeleter
 {
     public:
@@ -1632,6 +1652,7 @@ class FILEDeleter
             pclose( f );
         }
 };
+} // namespace
 
 /** Execute a command with the shell by using `popen()`.
  * @param command The full command to execute.

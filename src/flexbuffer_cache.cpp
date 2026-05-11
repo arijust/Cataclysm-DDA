@@ -130,6 +130,8 @@ std::vector<uint8_t> parse_json_to_flexbuffer_(
 
 } // namespace
 
+namespace
+{
 struct flexbuffer_vector_storage : flexbuffer_storage {
     std::vector<uint8_t> buffer_;
 
@@ -156,6 +158,7 @@ struct flexbuffer_mmap_storage : flexbuffer_storage {
         return mmap_handle_->len();
     }
 };
+} // namespace
 
 parsed_flexbuffer::parsed_flexbuffer( std::shared_ptr<flexbuffer_storage> storage )
     : storage_{ std::move( storage ) }
@@ -163,6 +166,8 @@ parsed_flexbuffer::parsed_flexbuffer( std::shared_ptr<flexbuffer_storage> storag
     // TODO assert?
 }
 
+namespace
+{
 struct file_flexbuffer : parsed_flexbuffer {
         file_flexbuffer(
             std::shared_ptr<flexbuffer_storage> &&storage,
@@ -204,7 +209,10 @@ struct file_flexbuffer : parsed_flexbuffer {
         std::filesystem::file_time_type mtime_;
         std::streampos offset_;
 };
+} // namespace
 
+namespace
+{
 struct string_flexbuffer : parsed_flexbuffer {
         string_flexbuffer( std::shared_ptr<flexbuffer_storage> &&storage, std::string &&source )
             : parsed_flexbuffer{ std::move( storage ) },
@@ -229,7 +237,9 @@ struct string_flexbuffer : parsed_flexbuffer {
     private:
         std::string source_;
 };
+} // namespace
 
+// NOLINTNEXTLINE(misc-use-internal-linkage): forward-declared in flexbuffer_cache.h
 class flexbuffer_disk_cache
 {
     public:

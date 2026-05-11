@@ -32,6 +32,8 @@ static ImGuiKey cata_key_to_imgui( int cata_key );
 
 #include "color_loader.h"
 
+namespace
+{
 struct RGBTuple {
     uint8_t Blue;
     uint8_t Green;
@@ -46,6 +48,7 @@ struct pairs {
 ImVec4 impalette[256] = {};
 std::array<RGBTuple, color_loader<RGBTuple>::COLOR_NAMES_COUNT> rgbPalette;
 std::array<pairs, 100> colorpairs;   //storage for paired colors
+} // namespace
 
 static ImVec4 compute_color( uint8_t index )
 {
@@ -89,7 +92,10 @@ ImVec4 cataimgui::imvec4_from_color( const nc_color &color )
     return impalette[palette_index];
 }
 
+namespace
+{
 std::vector<std::pair<int, ImTui::mouse_event>> imtui_events;
+} // namespace
 
 static int GetFallbackStrWidth( const char *s_begin, const char *s_end,
                                 const float scale )
