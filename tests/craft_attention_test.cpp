@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "activity_actor_definitions.h"
 #include "avatar.h"
 #include "calendar.h"
 #include "cata_catch.h"
@@ -22,12 +23,15 @@
 #include "map.h"
 #include "map_helpers.h"
 #include "map_selector.h"
+#include "player_activity.h"
+#include "player_helpers.h"
 #include "point.h"
 #include "recipe.h"
 #include "requirements.h"
 #include "type_id.h"
 
 static const itype_id itype_2x4( "2x4" );
+static const itype_id itype_microwave( "microwave" );
 
 static const recipe_id recipe_cudgel_test_consecutive_unattended(
     "cudgel_test_consecutive_unattended" );
@@ -683,5 +687,279 @@ TEST_CASE( "craft_env_unpause_alarm_clears_when_already_due",
 
     CHECK( on_map.get_alarm_at() == calendar::before_time_starts );
     CHECK( on_map.get_pause_started_at() == calendar::before_time_starts );
+}
+
+TEST_CASE( "craft_stamp_arms_env_check_when_step_has_env_requirements",
+           "[craft][attention][env_check]" )
+{
+    clear_avatar();
+    clear_map();
+    avatar &u = get_avatar();
+    map &here = get_map();
+    const tripoint_bub_ms origin( 60, 60, 0 );
+    u.setpos( here, origin );
+    u.i_add( item( itype_microwave, calendar::turn ) );
+
+    item ingredient( itype_2x4, calendar::turn );
+    item placed( &recipe_cudgel_test_unattended_with_qual.obj(), 1, ingredient );
+    item &on_map = here.add_item( origin, placed );
+    REQUIRE( on_map.is_craft() );
+    on_map.set_current_step( 1 );
+    on_map.set_crafter_id( u.getID() );
+    on_map.set_step_plans( std::vector<attention_plan>( 2 ) );
+
+    item_location loc( map_cursor( here.get_abs( origin ) ), &on_map );
+    craft_stamp_passive_entry( on_map, u, calendar::turn, loc );
+
+    // Step has OVEN quality requirement -> env_check_at armed at now+1min,
+    // clamped under ready_at.
+    REQUIRE( on_map.get_passive_started_at() == calendar::turn );
+    CHECK( on_map.get_env_check_at() != calendar::before_time_starts );
+    CHECK( on_map.get_env_check_at() <= on_map.get_ready_at() );
+    CHECK( get_item_wakeups().is_scheduled( on_map.uid().get_value(),
+                                            item_wakeup_kind::env_check ) );
+}
+
+TEST_CASE( "craft_stamp_skips_env_check_when_step_has_no_env_requirements",
+           "[craft][attention][env_check]" )
+{
+    clear_avatar();
+    clear_map();
+    avatar &u = get_avatar();
+    map &here = get_map();
+    const tripoint_bub_ms origin( 60, 60, 0 );
+    u.setpos( here, origin );
+
+    item ingredient( itype_2x4, calendar::turn );
+    item placed( &recipe_cudgel_test_unattended_simple.obj(), 1, ingredient );
+    item &on_map = here.add_item( origin, placed );
+    REQUIRE( on_map.is_craft() );
+    on_map.set_current_step( 1 );
+    on_map.set_crafter_id( u.getID() );
+    on_map.set_step_plans( std::vector<attention_plan>( 2 ) );
+
+    item_location loc( map_cursor( here.get_abs( origin ) ), &on_map );
+    craft_stamp_passive_entry( on_map, u, calendar::turn, loc );
+
+    REQUIRE( on_map.get_passive_started_at() == calendar::turn );
+    CHECK( on_map.get_env_check_at() == calendar::before_time_starts );
+    CHECK_FALSE( get_item_wakeups().is_scheduled( on_map.uid().get_value(),
+                 item_wakeup_kind::env_check ) );
+}
+
+TEST_CASE( "craft_env_check_dispatch_pauses_when_quality_missing",
+           "[craft][attention][env_check]" )
+{
+    clear_avatar();
+    clear_map();
+    avatar &u = get_avatar();
+    map &here = get_map();
+    const tripoint_bub_ms origin( 60, 60, 0 );
+    u.setpos( here, origin );
+    // No OVEN tool: env_satisfied_for_step returns false.
+
+    item ingredient( itype_2x4, calendar::turn );
+    item placed( &recipe_cudgel_test_unattended_with_qual.obj(), 1, ingredient );
+    item &on_map = here.add_item( origin, placed );
+    REQUIRE( on_map.is_craft() );
+    on_map.set_current_step( 1 );
+    on_map.set_crafter_id( u.getID() );
+    on_map.set_step_plans( std::vector<attention_plan>( 2 ) );
+
+    const time_point t0 = calendar::turn;
+    on_map.set_passive_started_at( t0 );
+    on_map.set_ready_at( t0 + 10_minutes );
+
+    item_location loc( map_cursor( here.get_abs( origin ) ), &on_map );
+
+    const time_point fire_time = t0 + 1_minutes;
+    craft_actualize_scheduled( on_map, item_wakeup_kind::env_check,
+                               fire_time, loc );
+
+    CHECK( on_map.get_pause_started_at() == fire_time );
+    CHECK( on_map.get_saved_ready_at() == t0 + 10_minutes );
+    CHECK( on_map.get_ready_at() == fire_time + 1_minutes );
+    CHECK( on_map.get_env_check_at() == calendar::before_time_starts );
+}
+
+TEST_CASE( "craft_env_check_dispatch_restores_when_quality_returns",
+           "[craft][attention][env_check]" )
+{
+    clear_avatar();
+    clear_map();
+    avatar &u = get_avatar();
+    map &here = get_map();
+    const tripoint_bub_ms origin( 60, 60, 0 );
+    u.setpos( here, origin );
+
+    item ingredient( itype_2x4, calendar::turn );
+    item placed( &recipe_cudgel_test_unattended_with_qual.obj(), 1, ingredient );
+    item &on_map = here.add_item( origin, placed );
+    REQUIRE( on_map.is_craft() );
+    on_map.set_current_step( 1 );
+    on_map.set_crafter_id( u.getID() );
+    on_map.set_step_plans( std::vector<attention_plan>( 2 ) );
+
+    // Manually install a pause state, then satisfy env and dispatch env_check.
+    const time_point t0 = calendar::turn;
+    on_map.set_passive_started_at( t0 - 2_minutes );
+    on_map.set_ready_at( t0 + 1_minutes ); // pause polling cursor
+    on_map.set_saved_ready_at( t0 + 8_minutes );
+    on_map.set_pause_started_at( t0 - 1_minutes );
+
+    item_location loc( map_cursor( here.get_abs( origin ) ), &on_map );
+
+    // Restore environment.
+    u.i_add( item( itype_microwave, calendar::turn ) );
+    craft_actualize_scheduled( on_map, item_wakeup_kind::env_check, t0, loc );
+
+    CHECK( on_map.get_pause_started_at() == calendar::before_time_starts );
+    CHECK( on_map.get_ready_at() == t0 + 8_minutes + 1_minutes );
+    CHECK( on_map.get_saved_ready_at() == calendar::before_time_starts );
+    CHECK( on_map.get_env_check_at() != calendar::before_time_starts );
+    CHECK( on_map.get_env_check_at() <= on_map.get_ready_at() );
+}
+
+TEST_CASE( "craft_env_check_dispatch_clamps_cursor_under_ready_at",
+           "[craft][attention][env_check]" )
+{
+    clear_avatar();
+    clear_map();
+    avatar &u = get_avatar();
+    map &here = get_map();
+    const tripoint_bub_ms origin( 60, 60, 0 );
+    u.setpos( here, origin );
+    u.i_add( item( itype_microwave, calendar::turn ) );
+
+    item ingredient( itype_2x4, calendar::turn );
+    item placed( &recipe_cudgel_test_unattended_with_qual.obj(), 1, ingredient );
+    item &on_map = here.add_item( origin, placed );
+    REQUIRE( on_map.is_craft() );
+    on_map.set_current_step( 1 );
+    on_map.set_crafter_id( u.getID() );
+    on_map.set_step_plans( std::vector<attention_plan>( 2 ) );
+
+    // Short remaining: ready_at is 30s away.  Cursor must clamp to ready_at,
+    // not now+1min which would poll past completion.
+    const time_point t0 = calendar::turn;
+    on_map.set_passive_started_at( t0 - 9_minutes - 30_seconds );
+    on_map.set_ready_at( t0 + 30_seconds );
+
+    item_location loc( map_cursor( here.get_abs( origin ) ), &on_map );
+    craft_actualize_scheduled( on_map, item_wakeup_kind::env_check, t0, loc );
+
+    CHECK( on_map.get_env_check_at() == t0 + 30_seconds );
+}
+
+TEST_CASE( "craft_actualize_ready_via_helper_still_pauses_on_env_loss",
+           "[craft][attention][env_check][regression]" )
+{
+    clear_avatar();
+    clear_map();
+    avatar &u = get_avatar();
+    map &here = get_map();
+    const tripoint_bub_ms origin( 60, 60, 0 );
+    u.setpos( here, origin );
+
+    item ingredient( itype_2x4, calendar::turn );
+    item placed( &recipe_cudgel_test_unattended_with_qual.obj(), 1, ingredient );
+    item &on_map = here.add_item( origin, placed );
+    REQUIRE( on_map.is_craft() );
+    on_map.set_current_step( 1 );
+    on_map.set_crafter_id( u.getID() );
+    on_map.set_step_plans( std::vector<attention_plan>( 2 ) );
+
+    const time_point t0 = calendar::turn;
+    on_map.set_passive_started_at( t0 );
+    on_map.set_ready_at( t0 + 10_minutes );
+
+    item_location loc( map_cursor( here.get_abs( origin ) ), &on_map );
+
+    // ready_check at ready_at with no OVEN tool must pause the craft.
+    craft_actualize_scheduled( on_map, item_wakeup_kind::ready_check,
+                               t0 + 10_minutes, loc );
+
+    CHECK( on_map.get_pause_started_at() == t0 + 10_minutes );
+    CHECK( on_map.get_saved_ready_at() == t0 + 10_minutes );
+    CHECK( on_map.get_ready_at() == t0 + 11_minutes );
+    CHECK( on_map.get_env_check_at() == calendar::before_time_starts );
+}
+
+TEST_CASE( "craft_activity_do_wait_env_check_fires_per_turn",
+           "[craft][attention][env_check][actor]" )
+{
+    clear_avatar();
+    clear_map();
+    avatar &u = get_avatar();
+    map &here = get_map();
+    const tripoint_bub_ms origin( 60, 60, 0 );
+    u.setpos( here, origin );
+    // No OVEN: per-turn env_check inside do_wait branch must trip pause.
+
+    item ingredient( itype_2x4, calendar::turn );
+    item placed( &recipe_cudgel_test_unattended_with_qual.obj(), 1, ingredient );
+    item &on_map = here.add_item( origin, placed );
+    REQUIRE( on_map.is_craft() );
+    on_map.set_current_step( 1 );
+    on_map.set_crafter_id( u.getID() );
+    std::vector<attention_plan> plans( 2 );
+    plans[1].choice = step_choice::do_wait;
+    on_map.set_step_plans( plans );
+
+    const time_point t0 = calendar::turn;
+    on_map.set_passive_started_at( t0 );
+    on_map.set_ready_at( t0 + 10_minutes );
+
+    item_location loc( map_cursor( here.get_abs( origin ) ), &on_map );
+    REQUIRE( on_map.get_pause_started_at() == calendar::before_time_starts );
+
+    craft_activity_actor craft_actor( loc, /*is_long=*/false );
+    u.activity = player_activity( craft_actor );
+    u.activity.targets.push_back( loc );
+
+    u.activity.do_turn( u );
+
+    CHECK( on_map.get_pause_started_at() != calendar::before_time_starts );
+    CHECK( on_map.get_saved_ready_at() == t0 + 10_minutes );
+}
+
+TEST_CASE( "reconcile_walks_avatar_inventory_for_env_check",
+           "[craft][attention][env_check][reconcile]" )
+{
+    clear_avatar();
+    clear_map();
+    avatar &u = get_avatar();
+    u.setpos( get_map(), tripoint_bub_ms( 60, 60, 0 ) );
+
+    item ingredient( itype_2x4, calendar::turn );
+    item carried( &recipe_cudgel_test_unattended_with_qual.obj(), 1, ingredient );
+    carried.set_current_step( 1 );
+    carried.set_crafter_id( u.getID() );
+    carried.set_step_plans( std::vector<attention_plan>( 2 ) );
+
+    const time_point t0 = calendar::turn;
+    carried.set_passive_started_at( t0 );
+    carried.set_ready_at( t0 + 10_minutes );
+    carried.set_env_check_at( t0 + 1_minutes );
+
+    item_location placed = u.i_add( carried );
+    REQUIRE( placed );
+    REQUIRE( placed->is_craft() );
+    const int64_t uid = placed->uid().get_value();
+
+    // Clear any schedule that i_add may have triggered, then exercise the
+    // same iteration map::reconcile_item_wakeups uses for character inventory
+    // (Character::all_items_loc() + rebuild_for_item per location).
+    get_item_wakeups().cancel_all( uid );
+    REQUIRE_FALSE( get_item_wakeups().is_scheduled( uid, item_wakeup_kind::env_check ) );
+
+    for( item_location &loc : u.all_items_loc() ) {
+        if( loc && loc.get_item() != nullptr ) {
+            get_item_wakeups().rebuild_for_item( loc );
+        }
+    }
+
+    CHECK( get_item_wakeups().is_scheduled( uid, item_wakeup_kind::env_check ) );
+    CHECK( get_item_wakeups().is_scheduled( uid, item_wakeup_kind::ready_check ) );
 }
 
