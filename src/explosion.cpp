@@ -122,6 +122,8 @@ static constexpr float MIN_EFFECTIVE_VELOCITY = 70.0f;
 static constexpr float MIN_FRAGMENT_DENSITY = 0.001f;
 
 
+namespace
+{
 //reads shrapnel data as object or int
 class shrapnel_reader : public generic_typed_reader<shrapnel_reader>
 {
@@ -141,6 +143,7 @@ class shrapnel_reader : public generic_typed_reader<shrapnel_reader>
             return ret;
         }
 };
+} // namespace
 
 void explosion_data::deserialize( const JsonObject &jo )
 {

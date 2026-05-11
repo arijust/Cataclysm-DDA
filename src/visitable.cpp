@@ -858,6 +858,8 @@ std::list<item> vehicle_selector::remove_items_with( const
     return res;
 }
 
+namespace
+{
 // Per-tool stock for charges_of dedup. Legacy contributes local charges;
 // multimag records per-battery-pocket so shared-pool greedy can bill K uses
 // without re-solving firing_requirements.
@@ -870,6 +872,7 @@ struct tool_stock_entry {
     const item *src = nullptr;
     std::vector<std::pair<int, int>> battery;
 };
+} // namespace
 
 static tool_stock_entry build_multimag_entry( const item &e )
 {

@@ -230,6 +230,8 @@ static item_location find_study_book( const tripoint_abs_ms &zone_pos, Character
     return item_location();
 }
 
+namespace
+{
 /** Activity-associated item */
 struct act_item {
     /// inventory item
@@ -244,6 +246,7 @@ struct act_item {
           count( count ),
           consumed_moves( consumed_moves ) {}
 };
+} // namespace
 
 namespace multi_activity_actor
 {

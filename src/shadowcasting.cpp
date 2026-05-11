@@ -14,6 +14,8 @@
 // historically 8 bits is enough for rise and run, as a shadowcasting radius of 60
 // readily fits within that space. larger shadowcasting volumes may require larger
 // storage units; a radius of 120 definitely will not fit.
+namespace
+{
 struct slope {
     slope( int_least8_t rise, int_least8_t run ) {
         // Ensure run is always positive for the inequality operators
@@ -30,16 +32,16 @@ struct slope {
     int_least8_t run;
 };
 
-static bool operator<( const slope &lhs, const slope &rhs )
+bool operator<( const slope &lhs, const slope &rhs )
 {
     // a/b < c/d <=> a*d < c*b if b and d have the same sign.
     return lhs.rise * rhs.run < rhs.rise * lhs.run;
 }
-static bool operator>( const slope &lhs, const slope &rhs )
+bool operator>( const slope &lhs, const slope &rhs )
 {
     return rhs < lhs;
 }
-static bool operator==( const slope &lhs, const slope &rhs )
+bool operator==( const slope &lhs, const slope &rhs )
 {
     // a/b == c/d <=> a*d == c*b
     return lhs.rise * rhs.run == rhs.rise * lhs.run;
@@ -61,6 +63,7 @@ struct span {
     bool skip_first_row;
     bool skip_first_column;
 };
+} // namespace
 
 /**
  * Handle splitting the current span in cast_horizontal_zlight_segment and

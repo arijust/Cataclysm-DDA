@@ -39,6 +39,8 @@
 
 #define dbg(x) DebugLog((x),D_SDL) << __FILE__ << ":" << __LINE__ << ": "
 
+namespace
+{
 struct sfx_args {
     std::string id;
     std::string variant;
@@ -64,9 +66,12 @@ struct sound_effect_resource {
     };
     std::unique_ptr<sound_backend::sfx_audio, deleter> chunk;
 };
+} // namespace
 
 static int add_sfx_path( const std::string &path );
 
+namespace
+{
 struct sound_effect {
     const int volume = 0;
     const int resource_id = 0;
@@ -75,6 +80,7 @@ struct sound_effect {
     sound_effect( int volume, const std::string &path )
         : volume( volume ), resource_id( add_sfx_path( path ) ) {}
 };
+} // namespace
 
 // Sound effects are primarily keyed by id
 // They support a variety of optional 'variations', such as:
@@ -229,6 +235,8 @@ int bool_or( const std::optional<bool> &opt, int defl )
 
 } // namespace
 
+namespace
+{
 struct sfx_map {
         void clear() {
             effects.clear();
@@ -288,6 +296,7 @@ struct music_playlist {
     music_playlist() : shuffle( false ) {
     }
 };
+} // namespace
 /** The music we're currently playing. */
 static sound_backend::music_source *current_music = nullptr;
 static int current_music_track_volume = 0;

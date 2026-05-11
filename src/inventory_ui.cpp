@@ -242,6 +242,8 @@ struct inventory_input {
     inventory_entry *entry;
 };
 
+namespace
+{
 struct container_data {
     units::volume actual_capacity;
     units::volume total_capacity;
@@ -256,12 +258,15 @@ struct container_data {
                               unit_to_string( max_containable_length, true ) );
     }
 };
+} // namespace
 
 bool inventory_entry::operator==( const inventory_entry &other ) const
 {
     return get_category_ptr() == other.get_category_ptr() && locations == other.locations;
 }
 
+namespace
+{
 class selection_column_preset : public inventory_selector_preset
 {
     public:
@@ -304,6 +309,7 @@ class selection_column_preset : public inventory_selector_preset
             return inventory_selector_preset::get_color( entry );
         }
 };
+} // namespace
 
 void inventory_selector_save_state::serialize( JsonOut &json ) const
 {

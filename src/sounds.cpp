@@ -208,6 +208,7 @@ struct centroid {
     float weight;
     bool provocative;
 };
+} // namespace
 
 namespace io
 {

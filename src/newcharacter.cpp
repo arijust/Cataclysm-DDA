@@ -319,6 +319,8 @@ static int has_unspent_points( const Character &u )
     return points_used_total( u ) < point_pool_total();
 }
 
+namespace
+{
 struct multi_pool {
     // The amount of unspent points in the pool without counting the borrowed points
     const int pure_stat_points, pure_trait_points, pure_skill_points;
@@ -337,6 +339,7 @@ struct multi_pool {
     {}
 
 };
+} // namespace
 
 // Toggle this trait and all prereqs, removing upgrades on removal
 void Character::toggle_trait_deps( const trait_id &tr, const std::string &variant )
@@ -1932,6 +1935,8 @@ void draw_scenario_details( const avatar &u )
     }
 }
 
+namespace
+{
 enum description_selector {
     NAME,
     GENDER,
@@ -1941,6 +1946,7 @@ enum description_selector {
     BLOOD,
     LOCATION
 };
+} // namespace
 
 void draw_name( const avatar &you, bool no_name_entered )
 {

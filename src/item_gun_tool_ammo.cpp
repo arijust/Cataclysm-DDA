@@ -495,11 +495,14 @@ double item::effective_dps( const Character &guy, Creature &mon ) const
     return total_damage * to_moves<double>( 1_seconds ) / total_moves;
 }
 
+namespace
+{
 struct dps_comp_data {
     mtype_id mon_id;
     bool display;
     bool evaluate;
 };
+} // namespace
 
 static const std::vector<std::pair<translation, dps_comp_data>> dps_comp_monsters = {
     { to_translation( "Best" ), { pseudo_debug_mon, true, false } },

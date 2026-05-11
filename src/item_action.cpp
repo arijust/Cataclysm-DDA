@@ -60,6 +60,8 @@ static std::optional<input_event> key_bound_to( const input_context &ctxt,
     }
 }
 
+namespace
+{
 class actmenu_cb : public uilist_callback
 {
     private:
@@ -81,6 +83,7 @@ class actmenu_cb : public uilist_callback
             return false;
         }
 };
+} // namespace
 
 item_action_generator::item_action_generator() = default;
 

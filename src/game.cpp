@@ -3025,6 +3025,8 @@ void game::display_faction_epilogues()
     }
 }
 
+namespace
+{
 struct npc_dist_to_player {
     const tripoint_abs_omt ppos{};
     npc_dist_to_player() : ppos( get_player_character().pos_abs_omt() ) { }
@@ -3037,6 +3039,7 @@ struct npc_dist_to_player {
                square_dist( ppos.xy(), bpos.xy() );
     }
 };
+} // namespace
 
 void game::disp_NPCs()
 {
@@ -7101,6 +7104,8 @@ void game::reload( item_location &loc, bool prompt, bool empty )
 }
 
 
+namespace
+{
 class reload_selector_preset : public inventory_selector_preset
 {
     public:
@@ -7114,6 +7119,7 @@ class reload_selector_preset : public inventory_selector_preset
     private:
         const Character &you;
 };
+} // namespace
 
 // Reload something.
 void game::reload_item()

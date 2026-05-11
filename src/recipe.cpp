@@ -1339,12 +1339,15 @@ std::string recipe::required_proficiencies_string( const Character *c ) const
     return required;
 }
 
+namespace
+{
 struct prof_penalty {
     proficiency_id id;
     float time_mult;
     float skill_penalty;
     bool mitigated = false;
 };
+} // namespace
 
 static std::string profstring( const prof_penalty &prof,
                                std::string &color,

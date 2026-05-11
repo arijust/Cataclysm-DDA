@@ -184,6 +184,8 @@ extern bool add_key_to_quick_shortcuts( int key, const std::string &category, bo
 
 static bool has_vehicle_control( avatar &player_character );
 
+namespace
+{
 class user_turn
 {
 
@@ -234,6 +236,7 @@ class user_turn
         }
 
 };
+} // namespace
 
 input_context game::get_player_input( std::string &action )
 {

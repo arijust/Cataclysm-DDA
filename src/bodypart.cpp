@@ -295,6 +295,8 @@ const std::vector<body_part_type> &body_part_type::get_all()
     return body_part_factory.get_all();
 }
 
+namespace
+{
 class encumbrance_per_weight_reader : public generic_typed_reader<encumbrance_per_weight_reader>
 {
     public:
@@ -338,6 +340,7 @@ struct limb_type_reader : generic_typed_reader<limb_type_reader> {
         return ret;
     }
 };
+} // namespace
 
 void body_part_type::load( const JsonObject &jo, std::string_view )
 {

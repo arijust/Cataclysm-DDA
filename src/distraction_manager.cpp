@@ -17,12 +17,15 @@
 namespace distraction_manager
 {
 
+namespace
+{
 struct configurable_distraction {
     bool *state;
     std::string name;
     std::string description;
     bool is_toggle = false;
 };
+} // namespace
 
 static const std::vector<configurable_distraction> &get_configurable_distractions()
 {

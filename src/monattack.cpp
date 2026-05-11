@@ -4402,10 +4402,13 @@ bool mattack::kamikaze( monster *z )
     return true;
 }
 
+namespace
+{
 struct grenade_helper_struct {
     std::string message;
     int chance = 1;
 };
+} // namespace
 
 // Returns 0 if this should be retired, 1 if it was successful, and -1 if something went horribly wrong
 static int grenade_helper( monster *const z, Creature *const target, const int dist,

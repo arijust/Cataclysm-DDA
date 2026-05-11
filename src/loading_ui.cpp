@@ -22,6 +22,8 @@
 #include "cursesdef.h"
 #endif // TILES
 
+namespace
+{
 struct ui_state {
     ui_adaptor *ui;
     background_pane *bg;
@@ -46,6 +48,7 @@ struct ui_state {
     std::string context;
     std::string step;
 };
+} // namespace
 
 static ui_state *gLUI = nullptr;
 

@@ -251,6 +251,8 @@ static input_context make_crafting_context( bool highlight_unread_recipes )
     return ctxt;
 }
 
+namespace
+{
 class recipe_result_info_cache
 {
         Character &crafter;
@@ -282,6 +284,7 @@ class recipe_result_info_cache
             return item_info_data( "", "", info, {}, scroll_pos );
         }
 };
+} // namespace
 
 std::pair<std::vector<const recipe *>, bool> recipes_from_cat( const recipe_subset
         &available_recipes, const crafting_category_id &cat, const std::string &subcat )
@@ -376,6 +379,8 @@ static bool filter_crafting_recipes( std::string &filterstring )
 // ImGui crafting UI implementation
 // ---------------------------------------------------------------------------
 
+namespace
+{
 class crafting_ui_impl : public cataimgui::window
 {
     public:
@@ -523,6 +528,7 @@ class crafting_ui_impl : public cataimgui::window
         void recalculate_unread();
         void invalidate_info_panels();
 };
+} // namespace
 
 // --- Constructor ---
 

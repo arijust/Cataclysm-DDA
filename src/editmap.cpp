@@ -1017,6 +1017,8 @@ std::optional<int_id<T_t>> editmap_brush::select_feature()
 /*
  * edit items in target square. WIP
  */
+namespace
+{
 enum editmap_imenu_ent {
     imenu_bday,
     imenu_damage,
@@ -1027,6 +1029,7 @@ enum editmap_imenu_ent {
     imenu_savetest,
     imenu_exit,
 };
+} // namespace
 
 void editmap_ui::edit_items()
 {
