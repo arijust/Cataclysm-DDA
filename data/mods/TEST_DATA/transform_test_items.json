@@ -26,6 +26,22 @@
     "melee_damage": { "bash": 10 }
   },
   {
+    "id": "test_transform_timed_baton",
+    "type": "ITEM",
+    "category": "weapons",
+    "name": { "str": "test timed baton" },
+    "description": "Test baton that transforms via countdown_action.",
+    "weight": "600 g",
+    "volume": "140 ml",
+    "longest_side": "24 cm",
+    "symbol": "/",
+    "color": "dark_gray",
+    "material": [ "steel" ],
+    "countdown_action": { "type": "transform", "target": "test_transform_baton_long" },
+    "countdown_interval": "1 seconds",
+    "melee_damage": { "bash": 4 }
+  },
+  {
     "id": "test_transform_short_vest",
     "type": "ITEM",
     "subtypes": [ "ARMOR" ],
