@@ -477,14 +477,12 @@ void cataimgui::client::load_fonts( UNUSED const Font_Ptr &gui_font,
             load_font( io, gui_typefaces, ranges.begin(),
                        static_cast<float>( lroundf( fontheight * 1.5f ) ) );
         }
-        for( int i = 0; i < io.Fonts->Fonts.Size; i++ ) {
-            io.Fonts->Fonts[i]->SetFallbackStrSizeCallback( GetFallbackStrWidth );
-            io.Fonts->Fonts[i]->SetFallbackCharSizeCallback( GetFallbackCharWidth );
-            io.Fonts->Fonts[i]->SetRenderFallbackCharCallback( CanRenderFallbackChar );
-        }
         io.Fonts->Build();
         for( int i = 0; i < io.Fonts->Fonts.Size; i++ ) {
             check_font( io.Fonts->Fonts[i] );
+            io.Fonts->Fonts[i]->SetFallbackStrSizeCallback( GetFallbackStrWidth );
+            io.Fonts->Fonts[i]->SetFallbackCharSizeCallback( GetFallbackCharWidth );
+            io.Fonts->Fonts[i]->SetRenderFallbackCharCallback( CanRenderFallbackChar );
         }
         ImGui::SetCurrentFont( ImGui::GetDefaultFont() );
 #if SDL_MAJOR_VERSION >= 3
