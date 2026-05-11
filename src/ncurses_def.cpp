@@ -72,7 +72,7 @@ int get_window_height()
 catacurses::window catacurses::newwin( const int nlines, const int ncols, const point &begin )
 {
     // TODO: check for errors
-    const auto w = ::newwin( nlines, ncols, begin.y, begin.x );
+    ::WINDOW *const w = ::newwin( nlines, ncols, begin.y, begin.x );
     return catacurses::window( std::shared_ptr<void>( w, []( void *const w ) {
         ::curses_check_result( ::delwin( static_cast<::WINDOW *>( w ) ), OK, "delwin" );
     } ) );
@@ -332,9 +332,8 @@ catacurses::window catacurses::newscr;
 void catacurses::resizeterm()
 {
 #if !defined(USE_PDCURSES)
-    const int new_x = ::getmaxx( stdscr.get<::WINDOW>() );
-    const int new_y = ::getmaxy( stdscr.get<::WINDOW>() );
-    if( ::is_term_resized( new_x, new_y ) )
+    const point new_size( ::getmaxx( stdscr.get<::WINDOW>() ), ::getmaxy( stdscr.get<::WINDOW>() ) );
+    if( ::is_term_resized( new_size.x, new_size.y ) )
 #endif
     {
         game_ui::init_ui();
@@ -621,8 +620,8 @@ void check_encoding()
         int key = ERR;
         do {
             const char *unicode_error_msg =
-                _( "You don't seem to have a valid Unicode locale. You may see some weird "
-                   "characters (e.g. empty boxes or question marks). You have been warned." );
+                _( "You don't seem to have a valid Unicode locale.  You may see some weird "
+                   "characters (e.g. empty boxes or question marks).  You have been warned." );
             catacurses::erase();
             const int maxx = getmaxx( catacurses::stdscr );
             fold_and_print( catacurses::stdscr, point::zero, maxx, c_white, unicode_error_msg );
