@@ -554,7 +554,7 @@ mtype MonsterGenerator::generate_fake_pseudo_dormant_monster( const mtype &mon )
     }
     // add the special attack.
     // first make a new mon_spellcasting_actor actor
-    std::unique_ptr<mon_spellcasting_actor> new_actor( new mon_spellcasting_actor() );
+    std::unique_ptr<mon_spellcasting_actor> new_actor = std::make_unique<mon_spellcasting_actor>();
     new_actor->allow_no_target = true;
     new_actor->cooldown = 1;
     new_actor->spell_data.id = spell_pseudo_dormant_trap_setup;
