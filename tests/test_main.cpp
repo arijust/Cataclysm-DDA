@@ -317,6 +317,7 @@ TEST_CASE( "noop_test", "[.]" )
 }
 
 
+// NOLINTNEXTLINE(bugprone-exception-escape): test runner intentionally lets exceptions propagate
 int main( int argc, const char *argv[] )
 {
     cata::init_allocator();

@@ -90,12 +90,12 @@ std::vector<uint8_t> parse_json_to_flexbuffer_(
             // Format is "(filename:)?(EOF:|line:col:) message"
             // But filename might be C:something
             int scanned_chars = 0;
-            // NOLINTNEXTLINE(cert-err34-c)
+            // NOLINTNEXTLINE(cert-err34-c,bugprone-unchecked-string-to-number-conversion)
             if( sscanf( parser.error_.c_str(), "%*[^:]:%*[^:]:%zu:%zu: %n", &line, &col,
                         &scanned_chars ) != 2 &&
-                // NOLINTNEXTLINE(cert-err34-c)
+                // NOLINTNEXTLINE(cert-err34-c,bugprone-unchecked-string-to-number-conversion)
                 sscanf( parser.error_.c_str(), "%*[^:]:%zu:%zu: %n", &line, &col, &scanned_chars ) != 2 &&
-                // NOLINTNEXTLINE(cert-err34-c)
+                // NOLINTNEXTLINE(cert-err34-c,bugprone-unchecked-string-to-number-conversion)
                 sscanf( parser.error_.c_str(), "%zu:%zu: %n", &line, &col, &scanned_chars ) != 2 ) {
                 line = 0;
                 col = 0;

@@ -569,8 +569,8 @@ bool nc_color::is_blink() const
     return attribute_value & A_BLINK;
 }
 
-void ensure_term_size(); // NOLINT(cata-static-declarations)
-void check_encoding(); // NOLINT(cata-static-declarations)
+void ensure_term_size(); // NOLINT(cata-static-declarations,misc-use-internal-linkage)
+void check_encoding(); // NOLINT(cata-static-declarations,misc-use-internal-linkage)
 
 void ensure_term_size()
 {
@@ -632,6 +632,7 @@ void check_encoding()
     }
 }
 
+// NOLINTNEXTLINE(cata-use-string_view): signature mirrors sdltiles/wincurse impls
 void set_title( const std::string & )
 {
     // curses does not seem to have a portable way of setting the window title.

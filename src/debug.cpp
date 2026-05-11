@@ -985,6 +985,7 @@ static std::optional<uintptr_t> debug_compute_load_offset(
     for( const char *nm_variant : nm_variants ) {
         std::ostringstream cmd;
         cmd << nm_variant << ' ' << binary << " 2>&1";
+        // NOLINTNEXTLINE(bugprone-command-processor): debug-only symbol resolution
         FILE *nm = popen( cmd.str().c_str(), "re" );
         if( !nm ) {
             out << "    backtrace: popen(nm) failed: " << strerror( errno ) << "\n";
@@ -1345,6 +1346,7 @@ void debug_write_backtrace( std::ostream &out )
             cmd << " 0x" << ( address - load_offset );
         }
         cmd << " 2>&1";
+        // NOLINTNEXTLINE(bugprone-command-processor): debug-only address symbolization
         FILE *addr2line = popen( cmd.str().c_str(), "re" );
         if( addr2line == nullptr ) {
             out << "    backtrace: popen(addr2line) failed\n";
@@ -1641,6 +1643,7 @@ static std::string shell_exec( const std::string &command )
     std::vector<char> buffer( 512 );
     std::string output;
     try {
+        // NOLINTNEXTLINE(bugprone-command-processor): crash-handler shells out by design
         std::unique_ptr<FILE, FILEDeleter> pipe( popen( command.c_str(), "r" ) );
         if( pipe ) {
             while( fgets( buffer.data(), buffer.size(), pipe.get() ) != nullptr ) {
