@@ -60,11 +60,12 @@ static int previous_gear = 0;
 static bool audio_muted = false;
 #endif
 
-static weather_type_id previous_weather;
-#if defined(SDL_SOUND)
-static std::optional<bool> previous_is_night;
-#endif
 static float g_sfx_volume_multiplier = 1.0f;
+
+#if defined(SDL_SOUND)
+static weather_type_id previous_weather;
+static std::optional<bool> previous_is_night;
+
 static std::chrono::high_resolution_clock::time_point start_sfx_timestamp =
     std::chrono::high_resolution_clock::now();
 static std::chrono::high_resolution_clock::time_point end_sfx_timestamp =
@@ -72,6 +73,7 @@ static std::chrono::high_resolution_clock::time_point end_sfx_timestamp =
 static auto sfx_time = end_sfx_timestamp - start_sfx_timestamp;
 static activity_id act;
 static std::pair<std::string, std::string> engine_external_id_and_variant;
+#endif
 
 static const bionic_id bio_sleep_shutdown( "bio_sleep_shutdown" );
 
@@ -81,13 +83,17 @@ static const efftype_id effect_narcosis( "narcosis" );
 static const efftype_id effect_sleep( "sleep" );
 static const efftype_id effect_slept_through_alarm( "slept_through_alarm" );
 
-static const itype_id fuel_type_battery( "battery" );
-static const itype_id fuel_type_muscle( "muscle" );
-static const itype_id fuel_type_wind( "wind" );
-
 static const json_character_flag json_flag_ALARMCLOCK( "ALARMCLOCK" );
 static const json_character_flag json_flag_HEARING_PROTECTION( "HEARING_PROTECTION" );
 static const json_character_flag json_flag_PAIN_IMMUNE( "PAIN_IMMUNE" );
+
+static const trait_id trait_HEAVYSLEEPER( "HEAVYSLEEPER" );
+static const trait_id trait_HEAVYSLEEPER2( "HEAVYSLEEPER2" );
+
+#if defined(SDL_SOUND)
+static const itype_id fuel_type_battery( "battery" );
+static const itype_id fuel_type_muscle( "muscle" );
+static const itype_id fuel_type_wind( "wind" );
 
 static const material_id material_bone( "bone" );
 static const material_id material_flesh( "flesh" );
@@ -173,10 +179,10 @@ static const ter_str_id ter_t_stump( "t_stump" );
 static const ter_str_id ter_t_trunk( "t_trunk" );
 static const ter_str_id ter_t_underbrush( "t_underbrush" );
 static const ter_str_id ter_t_underbrush_harvested( "t_underbrush_harvested" );
+#endif
 
-static const trait_id trait_HEAVYSLEEPER( "HEAVYSLEEPER" );
-static const trait_id trait_HEAVYSLEEPER2( "HEAVYSLEEPER2" );
-
+namespace
+{
 struct monster_sound_event {
     int volume;
     bool provocative;
