@@ -154,6 +154,14 @@ bool monster::will_move_to( map *here, const tripoint_bub_ms &p ) const
 {
     const std::vector<field_type_id> impassable_field_ids = here->get_impassable_field_type_ids_at( p );
 
+    for( const std::pair<const int_id<field_type>, field_entry> &pair : here->field_at( p ) ) {
+        const field_type_id &fid = pair.first;
+        const field_type &ft = fid.obj();
+        if( ft.block_mtypes.count( type->id ) > 0 ) {
+            return false;
+        }
+    }
+
     if( here->has_flag( ter_furn_flag::TFLAG_MON_AVOID_STRICT, p ) ) {
         return false;
     }
