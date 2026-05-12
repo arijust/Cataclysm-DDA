@@ -69,6 +69,8 @@ static void show_pickup_message( const PickupMap &mapPickup )
     }
 }
 
+namespace
+{
 struct pickup_count {
     bool pick = false;
     //count is 0 if the whole stack is being picked up, nonzero otherwise.
@@ -82,6 +84,7 @@ enum pickup_answer : int {
     STASH,
     NUM_ANSWERS
 };
+} // namespace
 
 static pickup_answer handle_problematic_pickup( const item &it, const std::string &explain )
 {

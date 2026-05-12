@@ -4022,11 +4022,14 @@ std::string Character::age_string( time_point when ) const
     return string_format( unformatted, age( when ) );
 }
 
+namespace
+{
 struct HeightLimits {
     int min_height = 0;
     int base_height = 0;
     int max_height = 0;
 };
+} // namespace
 
 /** Min and max heights in cm for each size category */
 static const std::map<creature_size, HeightLimits> size_category_height_limits {

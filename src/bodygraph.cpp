@@ -243,6 +243,8 @@ void bodygraph::check() const
 using part_tuple =
     std::tuple<bodypart_id, const sub_body_part_type *, const bodygraph_part *, bool>;
 
+namespace
+{
 struct bodygraph_display {
     const Character *u;
     bodygraph_id id;
@@ -285,6 +287,7 @@ struct bodygraph_display {
     void draw_info();
     void display();
 };
+} // namespace
 
 bodygraph_display::bodygraph_display( const Character *u, const bodygraph_id &id ) :
     u( u ), id( id ), ctxt( "BODYGRAPH" )

@@ -32,6 +32,8 @@
 
 static const faction_id faction_no_faction( "no_faction" );
 
+namespace
+{
 enum class mission_ui_tab_enum : int {
     ACTIVE = 0,
     COMPLETED,
@@ -39,6 +41,7 @@ enum class mission_ui_tab_enum : int {
     POINTS_OF_INTEREST,
     num_tabs
 };
+} // namespace
 
 static mission_ui_tab_enum &operator++( mission_ui_tab_enum &c )
 {
@@ -58,6 +61,8 @@ static mission_ui_tab_enum &operator--( mission_ui_tab_enum &c )
     return c;
 }
 
+namespace
+{
 class mission_ui
 {
         friend class mission_ui_impl;
@@ -487,6 +492,7 @@ void mission_ui_impl::draw_location( const std::string &label,
         draw_label_with_value( _( "Distance:" ), distance_str );
     }
 }
+} // namespace
 
 void game::list_missions()
 {

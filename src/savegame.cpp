@@ -1273,6 +1273,8 @@ void overmap::serialize_view( std::ostream &fout ) const
     json.end_object();
 }
 
+namespace
+{
 // Compares all fields except position and monsters
 // If any group has monsters, it is never equal to any group (because monsters are unique)
 struct mongroup_bin_eq {
@@ -1302,6 +1304,7 @@ struct mongroup_hash {
         return ret;
     }
 };
+} // namespace
 
 void overmap::save_monster_groups( JsonOut &jout ) const
 {

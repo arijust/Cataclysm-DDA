@@ -26,6 +26,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <type_traits>
 #include <unordered_map>
@@ -3025,6 +3026,8 @@ void game::display_faction_epilogues()
     }
 }
 
+namespace
+{
 struct npc_dist_to_player {
     const tripoint_abs_omt ppos{};
     npc_dist_to_player() : ppos( get_player_character().pos_abs_omt() ) { }
@@ -3037,6 +3040,7 @@ struct npc_dist_to_player {
                square_dist( ppos.xy(), bpos.xy() );
     }
 };
+} // namespace
 
 void game::disp_NPCs()
 {
@@ -6494,9 +6498,9 @@ int game::get_user_action_counter() const
 }
 
 #if defined(TILES)
-bool game::take_screenshot( const std::string &path ) const
+bool game::take_screenshot( std::string_view path ) const
 {
-    return save_screenshot( path );
+    return save_screenshot( std::string( path ) );
 }
 
 bool game::take_screenshot() const
@@ -6523,7 +6527,7 @@ bool game::take_screenshot() const
     }
 }
 #else
-bool game::take_screenshot( const std::string &/*path*/ ) const
+bool game::take_screenshot( std::string_view /*path*/ ) const
 {
     return false;
 }
@@ -7101,6 +7105,8 @@ void game::reload( item_location &loc, bool prompt, bool empty )
 }
 
 
+namespace
+{
 class reload_selector_preset : public inventory_selector_preset
 {
     public:
@@ -7114,6 +7120,7 @@ class reload_selector_preset : public inventory_selector_preset
     private:
         const Character &you;
 };
+} // namespace
 
 // Reload something.
 void game::reload_item()

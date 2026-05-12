@@ -4522,6 +4522,8 @@ static double tile_to_width( int tiles )
 
 static constexpr int minrow = -122;
 static constexpr int maxrow = 122;
+namespace
+{
 struct drag_column {
     int pro = minrow;
     int hboard = minrow;
@@ -4539,6 +4541,7 @@ struct drag_column {
     int last = maxrow;
     int lastpart = maxrow;
 };
+} // namespace
 
 double vehicle::coeff_air_drag() const
 {

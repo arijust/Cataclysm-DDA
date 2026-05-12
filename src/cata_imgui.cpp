@@ -32,6 +32,8 @@ static ImGuiKey cata_key_to_imgui( int cata_key );
 
 #include "color_loader.h"
 
+namespace
+{
 struct RGBTuple {
     uint8_t Blue;
     uint8_t Green;
@@ -46,6 +48,7 @@ struct pairs {
 ImVec4 impalette[256] = {};
 std::array<RGBTuple, color_loader<RGBTuple>::COLOR_NAMES_COUNT> rgbPalette;
 std::array<pairs, 100> colorpairs;   //storage for paired colors
+} // namespace
 
 static ImVec4 compute_color( uint8_t index )
 {
@@ -89,7 +92,10 @@ ImVec4 cataimgui::imvec4_from_color( const nc_color &color )
     return impalette[palette_index];
 }
 
+namespace
+{
 std::vector<std::pair<int, ImTui::mouse_event>> imtui_events;
+} // namespace
 
 static int GetFallbackStrWidth( const char *s_begin, const char *s_end,
                                 const float scale )
@@ -201,14 +207,14 @@ void cataimgui::client::process_input( void *input )
                         break;
                 }
             }
-            imtui_events.push_back( std::pair<int, ImTui::mouse_event>( KEY_MOUSE, new_mouse_event ) );
+            imtui_events.emplace_back( KEY_MOUSE, new_mouse_event );
         } else {
             int ch = curses_input->get_first_input();
             if( ch != UNKNOWN_UNICODE ) {
                 if( ch > 127 && ch < 245 ) { // Values between 127 and 245 indicate UTF-8
                     ch = utf8_wrapper( curses_input->text ).at( 0 );
                 }
-                imtui_events.push_back( std::pair<int, ImTui::mouse_event>( ch, new_mouse_event ) );
+                imtui_events.emplace_back( ch, new_mouse_event );
             }
         }
     }
@@ -959,10 +965,10 @@ bool cataimgui::window::is_bounds_changed()
     return p_impl->is_resized;
 }
 
-size_t cataimgui::window::get_text_width( const std::string &text )
+size_t cataimgui::window::get_text_width( std::string_view text )
 {
 #ifndef TUI
-    return ImGui::CalcTextSize( text.c_str() ).x;
+    return ImGui::CalcTextSize( text.data(), text.data() + text.size() ).x;
 #else
     return utf8_width( text );
 #endif

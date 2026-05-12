@@ -894,6 +894,8 @@ void effect_data::deserialize( const JsonObject &jo )
 
 } // namespace iuse
 
+namespace
+{
 class drug_vitamin_reader : public generic_typed_reader<drug_vitamin_reader>
 {
     public:
@@ -910,6 +912,7 @@ class drug_vitamin_reader : public generic_typed_reader<drug_vitamin_reader>
             return std::pair<vitamin_id, std::pair<int, int>>( ja.get_string( 0 ), std::make_pair( lo, hi ) );
         }
 };
+} // namespace
 
 void consume_drug_iuse::load( const JsonObject &obj, const std::string & )
 {
@@ -1410,6 +1413,8 @@ std::unique_ptr<iuse_actor> reveal_map_actor::clone() const
     return std::make_unique<reveal_map_actor>( *this );
 }
 
+namespace
+{
 class omt_reveal_type_reader : public generic_typed_reader<omt_reveal_type_reader>
 {
     public:
@@ -1425,6 +1430,7 @@ class omt_reveal_type_reader : public generic_typed_reader<omt_reveal_type_reade
                                    jo.get_enum_value<ot_match_type>( "om_terrain_match_type", ot_match_type::contains ) );
         }
 };
+} // namespace
 
 void reveal_map_actor::load( const JsonObject &obj, const std::string & )
 {

@@ -80,6 +80,8 @@ class keybindings_ui : public cataimgui::window
 
 static const std::string default_context_id( "default" );
 
+namespace
+{
 template <class T1, class T2>
 struct ContainsPredicate {
     const T1 &container;
@@ -91,6 +93,7 @@ struct ContainsPredicate {
         return std::find( container.begin(), container.end(), c ) != container.end();
     }
 };
+} // namespace
 
 bool input_context::action_uses_input( const std::string &action_id,
                                        const input_event &event ) const

@@ -974,6 +974,8 @@ void hacking_activity_actor::start( player_activity &act, Character & )
     act.moves_left = to_moves<int>( 5_minutes );
 }
 
+namespace
+{
 enum class hack_result : int {
     UNABLE,
     FAIL,
@@ -987,6 +989,7 @@ enum class hack_type : int {
     GAS,
     NONE
 };
+} // namespace
 
 static int hack_level( const Character &who, item_location &tool )
 {

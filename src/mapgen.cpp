@@ -411,6 +411,8 @@ void map::generate( const tripoint_abs_omt &p, const time_point &when, bool save
     set_abs_sub( p_sm_base );
 }
 
+namespace
+{
 class spawn_data_ammo_reader : public generic_typed_reader<spawn_data_ammo_reader>
 {
     public:
@@ -436,6 +438,7 @@ class spawn_data_patrol_reader : public generic_typed_reader<spawn_data_patrol_r
             return point_rel_ms( ptx.get(), pty.get() );
         }
 };
+} // namespace
 
 void spawn_data::deserialize( const JsonObject &jo )
 {
@@ -475,6 +478,8 @@ void mapgen_function_builtin::generate( mapgendata &mgd )
 ///// mapgen_function class.
 ///// all sorts of ways to apply our hellish reality to a grid-o-squares
 
+namespace
+{
 class mapgen_basic_container
 {
     private:
@@ -662,6 +667,7 @@ class mapgen_factory
                                                    string_format( "map special %s", key ) );
         }
 };
+} // namespace
 
 static mapgen_factory oter_mapgen;
 
@@ -1888,6 +1894,8 @@ ret_val<void> jmapgen_piece_with_has_vehicle_collision::has_vehicle_collision(
 }
 
 
+namespace
+{
 /**
  * This is a generic mapgen piece, the template parameter PieceType should be another specific
  * type of jmapgen_piece. This class contains a vector of those objects and will chose one of
@@ -2542,6 +2550,7 @@ class jmapgen_monster_group : public jmapgen_piece
             id.check( oter_name, parameters );
         }
 };
+} // namespace
 /**
  * Place spawn points for a specific monster.
  * "monster": id of the monster. or "group": id of the monster group.
@@ -2689,6 +2698,8 @@ class jmapgen_monster : public jmapgen_piece
         }
 };
 
+namespace
+{
 /**
  * Place a vehicle.
  * "vehicle": id of the vehicle.
@@ -3954,6 +3965,7 @@ class jmapgen_nested : public jmapgen_piece
             return ret_val<void>::make_success();
         }
 };
+} // namespace
 
 jmapgen_objects::jmapgen_objects( const tripoint_rel_ms &offset, const point_rel_ms &mapsize,
                                   const point_rel_ms &tot_size )
@@ -4588,6 +4600,8 @@ void update_mapgen_function_json::finalize_parameters()
     finalize_parameters_common();
 }
 
+namespace
+{
 struct phase_comparator {
     mapgen_phase get_phase( mapgen_phase p ) const {
         return p;
@@ -4607,6 +4621,7 @@ struct phase_comparator {
         return get_phase( l ) < get_phase( r );
     }
 };
+} // namespace
 
 static const phase_comparator compare_phases{};
 
@@ -7608,6 +7623,8 @@ ret_val<void> update_mapgen_function_json::update_map(
     return u;
 }
 
+namespace
+{
 class rotation_guard
 {
     public:
@@ -7631,6 +7648,7 @@ class rotation_guard
         const mapgendata &md;
         const int rotation;
 };
+} // namespace
 
 ret_val<void> update_mapgen_function_json::update_map( const mapgendata &md,
         const tripoint_rel_ms &offset,

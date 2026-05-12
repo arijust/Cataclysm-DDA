@@ -514,6 +514,9 @@ static constexpr float X = LIGHT_TRANSPARENCY_SOLID;
 
 static const tripoint_bub_ms ORIGIN( 65, 65, 11 );
 
+namespace
+{
+
 struct grid_overlay {
     std::vector<std::vector<std::vector<float>>> data;
     std::vector<std::vector<std::vector<bool>>> floor;
@@ -568,6 +571,8 @@ struct grid_overlay {
         return default_floor;
     }
 };
+
+} // namespace
 
 static void run_spot_check( const grid_overlay &test_case, const grid_overlay &expected,
                             bool fov_3d )

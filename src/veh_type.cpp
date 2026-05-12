@@ -1267,6 +1267,8 @@ static std::pair<std::string, std::string> get_vpart_str_variant( const std::str
            : std::make_pair( vpid.substr( 0, loc ), vpid.substr( loc + 1 ) );
 }
 
+namespace
+{
 struct veh_proto_part_def_reader : generic_typed_reader<veh_proto_part_def_reader> {
     point_rel_ms pos;
 
@@ -1309,6 +1311,7 @@ struct veh_spawn_item_reader : generic_typed_reader<veh_spawn_item_reader> {
         return ret;
     }
 };
+} // namespace
 
 void vehicle_item_spawn::deserialize( const JsonObject &jo )
 {

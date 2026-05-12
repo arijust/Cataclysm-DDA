@@ -35,6 +35,8 @@ static const mtype_id mon_test_zombie_cop( "mon_test_zombie_cop" );
 static const mtype_id mon_zombie( "mon_zombie" );
 static const mtype_id pseudo_debug_mon( "pseudo_debug_mon" );
 
+namespace
+{
 struct weakpoint_report_item {
     std::string weakpoint;
     int totaldamage;
@@ -43,7 +45,10 @@ struct weakpoint_report_item {
         hits{ 1 } { }
     weakpoint_report_item() : weakpoint_report_item( "", 0 ) { }
 };
+} // namespace
 
+namespace
+{
 struct weakpoint_report {
     int hits;
     std::map<std::string, weakpoint_report_item> items;
@@ -79,6 +84,7 @@ struct weakpoint_report {
         items.clear();
     }
 };
+} // namespace
 
 static weakpoint_report damage_monster( const mtype_id &target_type, const damage_instance &dam,
                                         int attacks )
@@ -281,12 +287,15 @@ TEST_CASE( "Check_copy-from_inheritance_between_sets_and_inline_weakpoints",
     }
 }
 
+namespace
+{
 struct wp_test_values {
     mtype_id mon;
     itype_id weapon;
     float skill_lvl;
     float accuracy = 0.f;
 };
+} // namespace
 
 static std::unordered_map<std::string, int> weakpoint_hit_distribution_proj(
     wp_test_values test_values )

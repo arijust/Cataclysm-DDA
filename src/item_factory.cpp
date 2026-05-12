@@ -75,6 +75,8 @@ template <typename T> struct enum_traits;
 // new object {"id": "CUT", "level": 1, "speed": 0.5} formats.
 // Produces std::pair<quality_id, itype::item_quality> for use with optional()
 // so that copy-from / extend / delete / proportional / relative all work.
+namespace
+{
 class item_quality_reader : public generic_typed_reader<item_quality_reader>
 {
     public:
@@ -125,6 +127,7 @@ class item_quality_reader : public generic_typed_reader<item_quality_reader>
             iter->second.level += parsed.second.level;
         }
 };
+} // namespace
 
 static const ammo_effect_str_id ammo_effect_COOKOFF( "COOKOFF" );
 static const ammo_effect_str_id ammo_effect_INCENDIARY( "INCENDIARY" );
@@ -1865,6 +1868,8 @@ Item_factory::~Item_factory() = default;
 
 Item_factory::Item_factory() = default;
 
+namespace
+{
 class iuse_function_wrapper : public iuse_actor
 {
     private:
@@ -1902,6 +1907,7 @@ class iuse_function_wrapper_with_info : public iuse_function_wrapper
             return std::make_unique<iuse_function_wrapper_with_info>( *this );
         }
 };
+} // namespace
 
 use_function::use_function( const std::string &type, const use_function_pointer f )
     : use_function( std::make_unique<iuse_function_wrapper>( type, f ) ) {}
@@ -2003,6 +2009,8 @@ static std::pair<std::string, use_function> use_function_reader_helper(
 }
 
 //reads use_function as either an object, array, or string into a map
+namespace
+{
 class use_function_reader_map : public generic_typed_reader<use_function_reader_map>
 {
     public:
@@ -2014,8 +2022,11 @@ class use_function_reader_map : public generic_typed_reader<use_function_reader_
             return use_function_reader_helper( ammo_scale, src, val );
         }
 };
+} // namespace
 
 //reads use_function as either an object, array, or string
+namespace
+{
 class use_function_reader_single : public generic_typed_reader<use_function_reader_single>
 {
     public:
@@ -2028,6 +2039,7 @@ class use_function_reader_single : public generic_typed_reader<use_function_read
             return use_function_reader_helper( ammo_scale, src, val ).second;
         }
 };
+} // namespace
 
 void Item_factory::init()
 {
@@ -2248,6 +2260,8 @@ void Item_factory::init()
 }
 
 //reads snippet as array or string
+namespace
+{
 class snippet_reader : public generic_typed_reader<snippet_reader>
 {
     public:
@@ -2269,6 +2283,7 @@ class snippet_reader : public generic_typed_reader<snippet_reader>
             return "";
         }
 };
+} // namespace
 
 void conditional_name::deserialize( const JsonObject &jo )
 {
@@ -3303,6 +3318,8 @@ void firing_requirement_set::deserialize_consumption_per_use(
 * Reads an array of gun modes in the following format:
 * [ gun_mode_id, display name, shots, flag ]
 */
+namespace
+{
 class gun_modes_reader : public generic_typed_reader<gun_modes_reader>
 {
     public:
@@ -3335,6 +3352,7 @@ class gun_modes_reader : public generic_typed_reader<gun_modes_reader>
             return std::pair<gun_mode_id, gun_modifier_data>( gun_mode_id::NULL_ID(), gun_modifier_data() );
         }
 };
+} // namespace
 
 void islot_gun::deserialize( const JsonObject &jo )
 {
@@ -3610,6 +3628,8 @@ void islot_tool::deserialize( const JsonObject &jo )
 * Reads an array of toolmod ammo-to-itype maps in the following format:
 * [ [ ammotype, [itype1, itype2, ..] ], .. ]
 */
+namespace
+{
 class magazine_adaptor_reader : public generic_typed_reader<magazine_adaptor_reader>
 {
     public:
@@ -3621,6 +3641,7 @@ class magazine_adaptor_reader : public generic_typed_reader<magazine_adaptor_rea
             return ret;
         }
 };
+} // namespace
 
 void islot_mod::deserialize( const JsonObject &jo )
 {
@@ -3653,6 +3674,8 @@ void islot_book::deserialize( const JsonObject &jo )
  * Format must be an array of array-pairs: [[a,b],[c,d]]
  * where a/c are string_id, b/d are int OR vitamin_units::mass string
  */
+namespace
+{
 class vitamins_reader : public generic_typed_reader<vitamins_reader>
 {
     public:
@@ -3675,6 +3698,7 @@ class vitamins_reader : public generic_typed_reader<vitamins_reader>
             val.throw_error( "vitamins reader read non-array" );
         }
 };
+} // namespace
 
 void islot_comestible::deserialize( const JsonObject &jo )
 {
@@ -3719,6 +3743,8 @@ void islot_comestible::deserialize( const JsonObject &jo )
     }
 }
 
+namespace
+{
 struct generic_result_reader : generic_typed_reader<generic_result_reader> {
     static constexpr bool read_objects = true;
     std::pair<std::pair<itype_id, std::string>, int> get_next( const JsonValue &jv ) const {
@@ -3743,6 +3769,7 @@ struct generic_result_reader : generic_typed_reader<generic_result_reader> {
         return ret;
     }
 };
+} // namespace
 
 void islot_brewable::deserialize( const JsonObject &jo )
 {
@@ -4076,6 +4103,8 @@ void Item_factory::add_special_pockets( itype &def )
     }
 }
 
+namespace
+{
 enum class grip_val : int {
     BAD = 0,
     NONE = 1,
@@ -4083,20 +4112,26 @@ enum class grip_val : int {
     WEAPON = 3,
     LAST = 4
 };
+} // namespace
 template<>
 struct enum_traits<grip_val> {
     static constexpr grip_val last = grip_val::LAST;
 };
+namespace
+{
 enum class length_val : int {
     HAND = 0,
     SHORT = 1,
     LONG = 2,
     LAST = 3
 };
+} // namespace
 template<>
 struct enum_traits<length_val> {
     static constexpr length_val last = length_val::LAST;
 };
+namespace
+{
 enum class surface_val : int {
     POINT = 0,
     LINE = 1,
@@ -4104,10 +4139,13 @@ enum class surface_val : int {
     EVERY = 3,
     LAST = 4
 };
+} // namespace
 template<>
 struct enum_traits<surface_val> {
     static constexpr surface_val last = surface_val::LAST;
 };
+namespace
+{
 enum class balance_val : int {
     CLUMSY = 0,
     UNEVEN = 1,
@@ -4115,6 +4153,7 @@ enum class balance_val : int {
     GOOD = 3,
     LAST = 4
 };
+} // namespace
 template<>
 struct enum_traits<balance_val> {
     static constexpr balance_val last = balance_val::LAST;
@@ -4242,6 +4281,8 @@ std::string enum_to_string<balance_val>( balance_val val )
 } // namespace io
 
 //a collection of int values that are summed to determine melee to_hit
+namespace
+{
 struct melee_accuracy {
     grip_val grip = grip_val::WEAPON;
     length_val length = length_val::HAND;
@@ -4310,6 +4351,7 @@ class melee_accuracy_reader : public generic_typed_reader<melee_accuracy_reader>
             return false;
         }
 };
+} // namespace
 
 static void replace_materials( const JsonObject &jo, itype &def )
 {

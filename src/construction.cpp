@@ -2304,6 +2304,8 @@ void construct::failure_deconstruct( const tripoint_bub_ms & )
     add_msg( m_info, _( "You cannot deconstruct this!" ) );
 }
 
+namespace
+{
 template <typename Fn>
 struct construction_special_reader : generic_typed_reader<construction_special_reader<Fn>> {
     const std::map<std::string, Fn> &possible;
@@ -2325,6 +2327,7 @@ struct construction_special_reader : generic_typed_reader<construction_special_r
         }
     }
 };
+} // namespace
 
 void load_construction( const JsonObject &jo, const std::string &src )
 {

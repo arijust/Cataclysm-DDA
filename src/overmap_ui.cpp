@@ -737,6 +737,8 @@ static void draw_camp_labels( const catacurses::window &w, const tripoint_abs_om
     }
 }
 
+namespace
+{
 class map_notes_callback : public uilist_callback
 {
     private:
@@ -832,6 +834,7 @@ class map_notes_callback : public uilist_callback
             ui.invalidate_ui();
         }
 };
+} // namespace
 
 static point_abs_omt draw_notes( const tripoint_abs_omt &origin )
 {
@@ -2407,12 +2410,15 @@ static tripoint_abs_omt display()
 
 } // namespace overmap_ui
 
+namespace
+{
 struct blended_omt {
     oter_id id;
     std::string sym;
     nc_color color;
     std::string name;
 };
+} // namespace
 
 oter_vision::blended_omt oter_vision::get_blended_omt_info( const tripoint_abs_omt &omp,
         om_vision_level vision )

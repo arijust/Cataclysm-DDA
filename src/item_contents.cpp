@@ -47,6 +47,8 @@ static const flag_id json_flag_CASING( "CASING" );
 static const flag_id json_flag_MAG_DESTROY( "MAG_DESTROY" );
 static const flag_id json_flag_MAG_EJECT( "MAG_EJECT" );
 
+namespace
+{
 class pocket_favorite_callback : public uilist_callback
 {
     private:
@@ -78,6 +80,7 @@ class pocket_favorite_callback : public uilist_callback
         }
         bool key( const input_context &, const input_event &event, int entnum, uilist *menu ) override;
 };
+} // namespace
 
 void pocket_favorite_callback::refresh( uilist *menu )
 {

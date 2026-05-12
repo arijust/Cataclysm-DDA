@@ -298,6 +298,8 @@ void activity_handlers::fill_liquid_do_turn( player_activity *act, Character *yo
     }
 }
 
+namespace
+{
 enum class repeat_type : int {
     // INIT should be zero. In some scenarios (vehicle welder), activity value default to zero.
     INIT = 0,       // Haven't found repeat value yet.
@@ -311,20 +313,21 @@ enum class repeat_type : int {
 };
 
 using I = std::underlying_type_t<repeat_type>;
-static constexpr bool operator>=( const I &lhs, const repeat_type &rhs )
+constexpr bool operator>=( const I &lhs, const repeat_type &rhs )
 {
     return lhs >= static_cast<I>( rhs );
 }
 
-static constexpr bool operator<=( const I &lhs, const repeat_type &rhs )
+constexpr bool operator<=( const I &lhs, const repeat_type &rhs )
 {
     return lhs <= static_cast<I>( rhs );
 }
 
-static constexpr I operator-( const repeat_type &lhs, const repeat_type &rhs )
+constexpr I operator-( const repeat_type &lhs, const repeat_type &rhs )
 {
     return static_cast<I>( lhs ) - static_cast<I>( rhs );
 }
+} // namespace
 
 static repeat_type repeat_menu( const std::string &title, repeat_type last_selection,
                                 const bool can_refit )
@@ -358,6 +361,8 @@ static repeat_type repeat_menu( const std::string &title, repeat_type last_selec
 // HACK: This is a part of a hack to provide pseudo items for long repair activity
 // Note: similar hack could be used to implement all sorts of vehicle pseudo-items
 //  and possibly CBM pseudo-items too.
+namespace
+{
 struct weldrig_hack {
     std::optional<vpart_reference> part;
     item pseudo;
@@ -429,6 +434,7 @@ struct weldrig_hack {
         clean_up();
     }
 };
+} // namespace
 
 void activity_handlers::repair_item_finish( player_activity *act, Character *you )
 {

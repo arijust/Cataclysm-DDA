@@ -1984,6 +1984,8 @@ void item::pet_armor_protection_info( std::vector<iteminfo> &info,
     }
 }
 
+namespace
+{
 // simple struct used for organizing encumbrance in an ordered set
 struct armor_encumb_data {
     int encumb;
@@ -2003,10 +2005,11 @@ struct armor_encumb_data {
     }
 };
 
-static bool operator<( const armor_encumb_data &lhs, const armor_encumb_data &rhs )
+bool operator<( const armor_encumb_data &lhs, const armor_encumb_data &rhs )
 {
     return lhs.encumb < rhs.encumb;
 }
+} // namespace
 
 void item::armor_info( std::vector<iteminfo> &info, const iteminfo_query *parts, int batch,
                        bool debug ) const
