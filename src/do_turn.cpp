@@ -463,8 +463,15 @@ void overmap_npc_move()
 
 } // namespace
 
-// MAIN GAME LOOP
-// Returns true if game is over (death, saved, quit, etc)
+/*
+* MAIN GAME LOOP
+*
+* Process a `turn`, equal to one in-game second, by doing two things:
+* 1. spend and replenish Creature::moves -- for `avatar`, `npc`, `monster`
+* 2. handle game systems (weather, missions, fields, see below)
+*
+* @return true if game is over (death, saved, quit, etc)
+*/
 bool do_turn()
 {
     if( g->is_game_over() ) {
@@ -472,7 +479,8 @@ bool do_turn()
     }
 
     weather_manager &weather = get_weather();
-    // Actual stuff
+
+    // Increment game turn
     if( g->new_game ) {
         g->new_game = false;
         if( get_option<std::string>( "ETERNAL_WEATHER" ) != "normal" ) {
@@ -548,12 +556,15 @@ bool do_turn()
     }
 
     weather.update_weather();
+
     g->reset_light_level();
     for( int z = -OVERMAP_DEPTH; z <= OVERMAP_HEIGHT; z++ ) {
         m.set_lightmap_cache_dirty( z );
     }
 
     g->perhaps_add_random_npc( /* ignore_spawn_timers_and_rates = */ false );
+
+    // process avatar activities (ignoring user input)
     while( u.get_moves() > 0 && u.activity ) {
         u.activity.do_turn( u );
     }
@@ -574,11 +585,15 @@ bool do_turn()
         sfx::do_hearing_loss();
     }
 
+    // avatar processes human input through handle_action()
     if( !u.has_effect( effect_sleep ) || g->uquit == QUIT_WATCH ) {
         if( u.get_moves() > 0 || g->uquit == QUIT_WATCH ) {
             while( u.get_moves() > 0 || g->uquit == QUIT_WATCH ) {
+
+                // handle_action() may cause map updates, creatures to die
                 m.process_falling();
                 g->cleanup_dead();
+
                 g->mon_info_update();
                 // Process any new sounds the player caused during their turn.
                 for( npc &guy : g->all_npcs() ) {
@@ -611,6 +626,8 @@ bool do_turn()
                 if( g->uquit == QUIT_WATCH ) {
                     break;
                 }
+
+                // avatar processes moves for activities started by handle_action()
                 while( u.get_moves() > 0 && u.activity ) {
                     u.activity.do_turn( u );
                 }
@@ -677,7 +694,10 @@ bool do_turn()
     // Update vision caches for monsters. If this turns out to be expensive,
     // consider a stripped down cache just for monsters.
     m.build_map_cache( levz, true );
+
+    // process monster and npc turn
     monmove();
+
     if( calendar::once_every( time_between_npc_OM_moves ) ) {
         overmap_npc_move();
     }
@@ -695,8 +715,12 @@ bool do_turn()
             }
         }
     }
+    // required after monsters move and fields emit
     g->mon_info_update();
+
+    // replenish avatar moves
     u.process_turn();
+
     if( u.get_moves() < 0 && get_option<bool>( "FORCE_REDRAW" ) ) {
         ui_manager::redraw();
         refresh_display();
@@ -706,6 +730,7 @@ bool do_turn()
         handle_weather_effects( weather.weather_id );
     }
 
+    // handle activity/progress/waiting UI
     const bool player_is_sleeping = u.has_effect( effect_sleep );
     bool wait_redraw = false;
     std::string wait_message;
