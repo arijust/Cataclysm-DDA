@@ -694,20 +694,7 @@ bool do_turn()
     if( calendar::once_every( time_between_npc_OM_moves ) ) {
         overmap_npc_move();
     }
-    if( calendar::once_every( 10_seconds ) ) {
-        for( const tripoint_bub_ms &elem : m.get_furn_field_locations() ) {
-            const furn_t &furn = *m.furn( elem );
-            for( const emit_id &e : furn.emissions ) {
-                m.emit_field( elem, e );
-            }
-        }
-        for( const tripoint_bub_ms &elem : m.get_ter_field_locations() ) {
-            const ter_t &ter = *m.ter( elem );
-            for( const emit_id &e : ter.emissions ) {
-                m.emit_field( elem, e );
-            }
-        }
-    }
+    m.furniture_terrain_emit_fields();
     // required after monsters move and fields emit
     g->mon_info_update();
 
