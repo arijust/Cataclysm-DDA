@@ -148,6 +148,18 @@
   },
   {
     "type": "item_group",
+    "id": "LS_SUS_crate_tier1_finale_loot",
+    "subtype": "collection",
+    "entries": [
+      { "group": "LS_SUS_tier0_kipple", "prob": 80 },
+      { "item": "nl_chem_thrower_mag", "prob": 10, "charges": 57 },
+      { "item": "plut_cell", "prob": 10 },
+      { "item": "exodii_wire_kit", "prob": 10 },
+      { "group": "LS_bionics", "prob": 50 }
+    ]
+  },
+  {
+    "type": "item_group",
     "id": "LS_SUS_crate_tier0_machineparts",
     "//": "Filler.  Pieces to repair stuff within the dungeon.",
     "subtype": "collection",

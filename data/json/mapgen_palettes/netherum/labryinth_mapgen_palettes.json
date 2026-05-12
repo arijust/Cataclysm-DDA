@@ -155,6 +155,7 @@
       "ϟ": "t_nl_metal_floor_overgrown",
       "ß": "t_nl_metal_floor_overgrown",
       "]": "t_nl_metal_floor_overgrown",
+      "?": "t_nl_metal_floor_overgrown",
       "-": "t_nl_sewage_pipe",
       "I": "t_nl_gates_mech_control"
     },
@@ -186,11 +187,15 @@
       "W": "f_workbench",
       "]": "f_chair_folding",
       "X": [ [ "f_metal_crate_r", 1 ], [ "f_metal_crate_c", 3 ] ],
+      "?": [ [ "f_metal_crate_c", 3 ] ],
       " ": [ [ "f_null", 98 ], [ "f_nl_climbing_vine", 2 ] ],
       ".": [ [ "f_null", 98 ], [ "f_nl_climbing_vine", 2 ] ]
     },
     "nested": { "1": { "chunks": [ [ "null", 1 ], [ "ls_2x2_furniture", 3 ] ] } },
-    "items": { "X": { "item": "LS_SUS_crate_tier1_loot", "chance": 70, "repeat": [ 1, 2 ] } },
+    "items": {
+      "X": { "item": "LS_SUS_crate_tier1_loot", "chance": 70, "repeat": [ 1, 2 ] },
+      "?": { "item": "LS_SUS_crate_tier1_finale_loot", "chance": 100 }
+    },
     "monsters": {
       " ": { "monster": "GROUP_Labyrinth_Hallmonitors", "density": 0.0003 },
       "t": { "monster": "GROUP_Labyrinth_Turret", "density": 0.01 }
