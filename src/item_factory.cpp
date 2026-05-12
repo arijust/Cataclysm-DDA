@@ -3039,10 +3039,16 @@ const itype *Item_factory::find_template( const itype_id &id ) const
 
     //If we didn't find the item maybe it is a building instead!
     const recipe_id &making_id = recipe_id( id.c_str() );
-    if( oter_str_id( id.c_str() ).is_valid() ||
-        ( making_id.is_valid() && making_id.obj().is_blueprint() ) ) {
-        return add_runtime( id, no_translation( string_format( "DEBUG: %s", id.c_str() ) ),
-                            making_id.obj().description );
+    const bool oter_match = oter_str_id( id.c_str() ).is_valid();
+    if( oter_match || ( making_id.is_valid() && making_id.obj().is_blueprint() ) ) {
+        // oter match alone makes the outer condition true; guard the
+        // making_id.obj() call so an invalid recipe id does not trigger
+        // a spurious "invalid recipe id" debugmsg.
+        translation desc;
+        if( making_id.is_valid() ) {
+            desc = making_id.obj().description;
+        }
+        return add_runtime( id, no_translation( string_format( "DEBUG: %s", id.c_str() ) ), desc );
     }
 
     debugmsg( "Missing item definition: %s", id.c_str() );
