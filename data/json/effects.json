@@ -828,6 +828,21 @@
   },
   {
     "type": "effect_type",
+    "id": "no_power_eyes",
+    "name": [ "Low Power" ],
+    "desc": [ "You're low on power.  Your eyes are operating in emergency mode and have limited function." ],
+    "rating": "bad",
+    "max_duration": "10 s",
+    "base_mods": { "per_mod": [ -2 ] },
+    "limb_score_mods": [
+      { "limb_score": "vision", "modifier": 0.5 },
+      { "limb_score": "night_vis", "modifier": 0.5 },
+      { "limb_score": "reaction", "modifier": 0.5 }
+    ],
+    "flags": [ "EFFECT_LIMB_SCORE_MOD" ]
+  },
+  {
+    "type": "effect_type",
     "id": "darkness",
     "apply_message": "Your vision flickers and goes gray!",
     "remove_message": "The world flickers back to normality.",
