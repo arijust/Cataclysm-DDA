@@ -2034,11 +2034,15 @@ void draw_location( const avatar &you )
 
     char_creation::draw_action_button( _( "Starting location:" ), "CHOOSE_LOCATION" );
 
+    if( you.random_start_location ) {
+        cataimgui::draw_colored_text( random_start_location_text, c_red );
+    } else {
     // ::find will return empty location if id was not found. Debug msg will be printed too.
     cataimgui::draw_colored_text( string_format( n_gettext( "%s (%d variant)", "%s (%d variants)",
                                   you.start_location.obj().targets_count() ),
                                   you.start_location.obj().name(), you.start_location.obj().targets_count() ),
                                   you.random_start_location ? c_red : c_white );
+}
 }
 
 void draw_starting_city( const avatar &you )
