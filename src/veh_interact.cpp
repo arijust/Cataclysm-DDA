@@ -1476,14 +1476,14 @@ void veh_interact::calc_overview( map &here )
                     }
                     const itype *pt_ammo_cur = item::find_type( pt.ammo_current() );
                     int offset = 1;
-                    std::string fmtstring = "%s %s  %5.1fL";
+                    std::string fmtstring = "%s %s  %s";
                     if( pt.is_leaking() ) {
-                        fmtstring = str_cat( "%s %s ", leak_marker, "%5.1fL", leak_marker );
+                        fmtstring = str_cat( "%s %s ", leak_marker, "%s", leak_marker );
                         offset = 0;
                     }
                     right_print( w, y, offset, pt_ammo_cur->color,
                                  string_format( fmtstring, specials, pt_ammo_cur->nname( 1 ),
-                                                round_up( units::to_liter( it.volume() ), 1 ) ) );
+                                                pt_ammo_cur->count_or_volume_or_weight_prefix( pt.ammo_remaining() ) ) );
                 } else {
                     if( pt.is_leaking() ) {
                         std::string outputstr = str_cat( leak_marker, "      ", leak_marker );
