@@ -988,6 +988,8 @@ class map
             return ter( tripoint_bub_ms( p, abs_sub.z() ) );
         }
 
+        void furniture_terrain_emit_fields();
+
         int get_map_damage( const tripoint_bub_ms &p ) const;
         void set_map_damage( const tripoint_bub_ms &p, int dmg );
 
