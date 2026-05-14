@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
+#include <iterator>
 #include <memory>
 #include <optional>
 #include <string>
@@ -338,6 +339,79 @@ item &inventory::add_item( item newit, bool keep_invlet, bool assign_invlet, boo
 
     items.emplace_back( std::list<item> { std::move( newit ) } );
     return items.back().back();
+}
+
+void inventory::add_items_bulk( std::vector<item> items_in, bool keep_invlet,
+                                bool assign_invlet, bool should_stack )
+{
+    // assign_invlet=true needs the per-item invlet collision resolution
+    // that bulk grouping cannot reproduce cheaply; fall back to add_item.
+    if( assign_invlet ) {
+        for( item &it : items_in ) {
+            add_item( std::move( it ), keep_invlet, assign_invlet, should_stack );
+        }
+        return;
+    }
+
+    binned = false;
+
+    if( !should_stack ) {
+        for( item &it : items_in ) {
+            if( !keep_invlet ) {
+                update_invlet( it, assign_invlet );
+            }
+            update_cache_with_item( it );
+            items.emplace_back( std::list<item> { std::move( it ) } );
+        }
+        return;
+    }
+
+    // Index existing stacks by the front item's typeId so each new entry skips
+    // the linear stacks_with sweep over unrelated stacks. Multiple stacks of
+    // the same typeId can coexist with different variant/damage/etc., so the
+    // bucket holds every match and the deep stacks_with check filters within.
+    std::unordered_map<itype_id, std::vector<invstack::iterator>> by_type;
+    for( auto it = items.begin(); it != items.end(); ++it ) {
+        by_type[it->front().typeId()].push_back( it );
+    }
+
+    for( item &newit : items_in ) {
+        bool merged = false;
+        auto bucket_it = by_type.find( newit.typeId() );
+        if( bucket_it != by_type.end() ) {
+            for( invstack::iterator stack_it : bucket_it->second ) {
+                std::list<item>::iterator front_it = stack_it->begin();
+                if( !front_it->stacks_with( newit ) ) {
+                    continue;
+                }
+                if( front_it->merge_charges( newit ) ) {
+                    merged = true;
+                    break;
+                }
+                if( front_it->invlet == '\0' ) {
+                    if( !keep_invlet ) {
+                        update_invlet( newit, assign_invlet );
+                    }
+                    update_cache_with_item( newit );
+                    front_it->invlet = newit.invlet;
+                } else {
+                    newit.invlet = front_it->invlet;
+                }
+                stack_it->emplace_back( std::move( newit ) );
+                merged = true;
+                break;
+            }
+        }
+        if( merged ) {
+            continue;
+        }
+        if( !keep_invlet ) {
+            update_invlet( newit, assign_invlet );
+        }
+        update_cache_with_item( newit );
+        items.emplace_back( std::list<item> { std::move( newit ) } );
+        by_type[items.back().front().typeId()].push_back( std::prev( items.end() ) );
+    }
 }
 
 void inventory::add_item_keep_invlet( const item &newit )
