@@ -130,6 +130,23 @@ jobs:
               brew install pkgconf sdl3 sdl3_image sdl3_ttf sdl3_mixer \
               gettext ccache parallel
 
+    - name: build SDL_shadercross from source (macOS)
+      if: matrix.platform == 'macos'
+      run: |
+          git clone --recursive --depth 1 https://github.com/libsdl-org/SDL_shadercross.git /tmp/SDL_shadercross
+          cd /tmp/SDL_shadercross
+          cmake -B build -DCMAKE_BUILD_TYPE=Release \
+              -DSDLSHADERCROSS_VENDORED=ON \
+              -DSDLSHADERCROSS_INSTALL=ON \
+              -DSDLSHADERCROSS_CLI=ON \
+              -DSDLSHADERCROSS_SHARED=OFF \
+              -DSDLSHADERCROSS_STATIC=ON \
+              -DSDLSHADERCROSS_SPIRVCROSS_SHARED=OFF \
+              -DSDLSHADERCROSS_DXC=OFF
+          cmake --build build --config Release -j$(sysctl -n hw.ncpu)
+          sudo cmake --install build
+          which shadercross
+
     - name: setup MSVC (Windows)
       if: matrix.platform == 'windows'
       uses: microsoft/setup-msbuild@6fb02220983dee41ce7ae257b6f4d8f9bf5ed4ce # v2
@@ -154,6 +171,35 @@ jobs:
       with:
         path: msvc-full-features/vcpkg_installed
         key: vcpkg-installed-sdl3-${{ hashFiles('msvc-full-features/vcpkg.json', '.github/vcpkg_triplets/x64-windows-static.cmake') }}-c3867e714dd3a51c272826eea77267876517ed99
+
+    - name: install glslang + build SDL_shadercross (Windows)
+      if: matrix.platform == 'windows'
+      shell: pwsh
+      env:
+        VCPKG_ROOT: ${{ runner.workspace }}\b\vcpkg
+      run: |
+          choco install -y --no-progress vulkan-sdk
+          $vulkanRoot = Get-ChildItem 'C:\VulkanSDK\' | Sort-Object Name -Descending | Select-Object -First 1
+          if ($vulkanRoot) { echo "$($vulkanRoot.FullName)\Bin" | Out-File -FilePath $env:GITHUB_PATH -Append }
+          # SDL_shadercross needs SDL3 headers/lib via find_package; install SDL3 to a
+          # standalone prefix via vcpkg (the overlay-port pins 3.4.4).
+          & "$env:VCPKG_ROOT\vcpkg.exe" install sdl3:x64-windows `
+              --overlay-ports "$env:GITHUB_WORKSPACE\vcpkg\overlay-ports" `
+              --x-install-root "$env:RUNNER_TEMP\sdl3_for_shadercross"
+          git clone --recursive --depth 1 https://github.com/libsdl-org/SDL_shadercross.git $env:RUNNER_TEMP\SDL_shadercross
+          cd $env:RUNNER_TEMP\SDL_shadercross
+          cmake -B build -G "Visual Studio 17 2022" -A x64 `
+              -DCMAKE_BUILD_TYPE=Release `
+              -DCMAKE_PREFIX_PATH="$env:RUNNER_TEMP\sdl3_for_shadercross\x64-windows" `
+              -DSDLSHADERCROSS_VENDORED=ON `
+              -DSDLSHADERCROSS_INSTALL=ON `
+              -DSDLSHADERCROSS_CLI=ON `
+              -DSDLSHADERCROSS_SHARED=OFF `
+              -DSDLSHADERCROSS_STATIC=ON
+          cmake --build build --config Release
+          $shadercrossBin = "$env:RUNNER_TEMP\SDL_shadercross\build\Release"
+          echo $shadercrossBin | Out-File -FilePath $env:GITHUB_PATH -Append
+          dir $shadercrossBin
 
     - name: build (Ubuntu)
       if: matrix.platform == 'linux'

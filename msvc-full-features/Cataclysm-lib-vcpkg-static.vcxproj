@@ -122,7 +122,7 @@
       <PreprocessorDefinitions>_CONSOLE;SDL_SOUND;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <PreBuildEvent>
-      <Command>..\msvc-full-features\prebuild.cmd</Command>
+      <Command>..\msvc-full-features\prebuild.cmd $(_UseSDL3)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">

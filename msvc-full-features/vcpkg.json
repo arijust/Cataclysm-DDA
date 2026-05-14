@@ -26,7 +26,8 @@
         { "name": "sdl3-mixer",
           "features": [ "libflac", "mpg123", "wavpack", "libvorbis" ],
           "default-features": false
-        }
+        },
+        "glslang"
       ]
     }
   },

@@ -13,3 +13,27 @@ echo Generating "version.h"...
 echo VERSION defined as "%VERSION%"
 >..\src\version.h echo #define VERSION "%VERSION%"
 )
+
+if /I "%~1"=="true" (
+echo Compiling shader artifacts...
+where shadercross >NUL 2>&1
+if errorlevel 1 (
+where glslangValidator >NUL 2>&1
+if errorlevel 1 (
+echo Shader compile failed: neither glslangValidator nor shadercross found on PATH.
+echo See doc/c++/COMPILING.md SDL3 section for toolchain install.
+exit /b 1
+)
+echo SDL_shadercross not found; producing SPIR-V only.
+echo The D3D12 GPU backend needs DXIL artifacts; variant_pass will
+echo probe-fail at runtime and the GPU sprite shader path stays inert.
+echo Atlas fallback remains active. See doc/c++/COMPILING.md SDL3 section.
+python ..\tools\build_shaders.py --shader-dir ..\data\shaders --formats spv --stamp ..\data\shaders\build-spv.stamp
+) else (
+python ..\tools\build_shaders.py --shader-dir ..\data\shaders --formats dxil --stamp ..\data\shaders\build-dxil.stamp
+)
+if errorlevel 1 (
+echo Shader compile failed. See doc/c++/COMPILING.md SDL3 section for toolchain install.
+exit /b 1
+)
+)
