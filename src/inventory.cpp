@@ -650,7 +650,16 @@ void inventory::form_from_map( map &m, std::vector<tripoint_bub_ms> pts, const C
             }
         }
         if( m.accessible_items( p ) ) {
-            for( item &i : m.i_at( p ) ) {
+            // assign_invlet=false has no per-item invlet collision pass, so a
+            // single bulk add per tile reproduces serial output while skipping
+            // the O(stacks) stacks_with sweep that add_item does per call.
+            map_stack items_here = m.i_at( p );
+            const bool bulk_eligible = !assign_invlet && items_here.size() > 1;
+            std::vector<item> bulk_batch;
+            if( bulk_eligible ) {
+                bulk_batch.reserve( items_here.size() );
+            }
+            for( item &i : items_here ) {
                 // if it's *the* player requesting this from from map inventory
                 // then don't allow items owned by another faction to be factored into recipe components etc.
                 if( pl && !i.is_owned_by( *pl, true ) ) {
@@ -661,8 +670,15 @@ void inventory::form_from_map( map &m, std::vector<tripoint_bub_ms> pts, const C
                         const int count = i.count_by_charges() ? i.charges : 1;
                         update_liq_container_count( i.typeId(), count );
                     }
-                    add_item( i, false, assign_invlet );
+                    if( bulk_eligible ) {
+                        bulk_batch.emplace_back( i );
+                    } else {
+                        add_item( i, false, assign_invlet );
+                    }
                 }
+            }
+            if( bulk_eligible && !bulk_batch.empty() ) {
+                add_items_bulk( std::move( bulk_batch ), false, false );
             }
         }
         // Kludges for now!
