@@ -60,13 +60,6 @@ def stage_for_source(src: Path) -> str:
     )
 
 
-def newer_than(src: Path, dst: Path) -> bool:
-    """True if src is newer than dst, or dst doesn't exist."""
-    if not dst.exists():
-        return True
-    return src.stat().st_mtime > dst.stat().st_mtime
-
-
 def compile_glsl_to_spv(glslang: str, src: Path, dst: Path) -> None:
     """Run glslangValidator GLSL -> SPIR-V."""
     stage = stage_for_source(src)
@@ -105,6 +98,11 @@ def main() -> int:
               "(default: data/shaders)"),
     )
     parser.add_argument(
+        "--shader",
+        type=Path,
+        help="Single shader to compile",
+    )
+    parser.add_argument(
         "--stamp",
         type=Path,
         default=None,
@@ -119,7 +117,6 @@ def main() -> int:
     args = parser.parse_args()
 
     shader_dir: Path = args.shader_dir
-    shader_dir.mkdir(parents=True, exist_ok=True)
 
     formats = {f.strip().lower() for f in args.formats.split(",") if f.strip()}
     unknown = formats - {"spv", "dxil", "msl"}
@@ -142,7 +139,10 @@ def main() -> int:
         print("build_shaders: {}".format(exc), file=sys.stderr)
         return 3
 
-    sources = collect_sources(shader_dir)
+    if args.shader:
+        sources = [args.shader]
+    else:
+        sources = collect_sources(args.shader_dir)
     if not sources:
         print("build_shaders: no shader sources found in {}".format(
               shader_dir), file=sys.stderr)
@@ -150,20 +150,18 @@ def main() -> int:
     try:
         for src in sources:
             spv = src.with_suffix(src.suffix + ".spv")
-            if "spv" in formats and newer_than(src, spv):
+            if "spv" in formats:
                 print("build_shaders: {} -> {}".format(src.name, spv.name))
                 compile_glsl_to_spv(glslang, src, spv)
             if "dxil" in formats:
                 dxil = src.with_suffix(src.suffix + ".dxil")
-                if newer_than(spv, dxil):
-                    print("build_shaders: {} -> {}".format(
-                        spv.name, dxil.name))
-                    compile_spv_to_dxil(shadercross, spv, dxil)
+                print("build_shaders: {} -> {}".format(
+                    spv.name, dxil.name))
+                compile_spv_to_dxil(shadercross, spv, dxil)
             if "msl" in formats:
                 msl = src.with_suffix(src.suffix + ".msl")
-                if newer_than(spv, msl):
-                    print("build_shaders: {} -> {}".format(spv.name, msl.name))
-                    compile_spv_to_msl(shadercross, spv, msl)
+                print("build_shaders: {} -> {}".format(spv.name, msl.name))
+                compile_spv_to_msl(shadercross, spv, msl)
     except subprocess.CalledProcessError as exc:
         print("build_shaders: shader compile failed (exit {}): {}".format(
             exc.returncode, " ".join(exc.cmd)), file=sys.stderr)

@@ -27,7 +27,8 @@
           "features": [ "libflac", "mpg123", "wavpack", "libvorbis" ],
           "default-features": false
         },
-        "glslang"
+        { "name": "glslang", "features": [ "tools" ] },
+        "sdl3-shadercross"
       ]
     }
   },
